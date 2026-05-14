@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FileText, Zap, Search, Target, ArrowRight, Sparkles, MessageSquare, Mic, Shield, Eye } from 'lucide-react';
+import { FileText, Zap, Target, ArrowRight, Sparkles, MessageSquare, Mic, Shield, Eye } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 
 const features = [
@@ -12,7 +12,7 @@ const features = [
   { icon: '✉️', title: 'Cover Letter Generator', desc: '8 cover letter types tailored to your role and industry.' },
   { icon: '🎤', title: 'Interview Prep', desc: '20 interview questions, STAR method guide, example answers & checklist.' },
   { icon: '🤖', title: 'AI Recruiter X-Ray', desc: 'A blunt AI hiring manager reacts to your CV against a real job description.' },
-  { icon: '🔒', title: 'Fully Offline & Private', desc: 'No account, no server, no tracking. All data stays on your device.' },
+  { icon: '🔒', title: 'Private by Default', desc: 'No account, no tracking. Your CV data stays on your device.' },
 ];
 
 const quickLinks = [
@@ -40,14 +40,16 @@ export default function Home() {
             <span className="text-primary">That Gets More Interviews</span>
           </h1>
           <p className="text-sm text-muted-foreground leading-relaxed mb-7">
-            Offline-first CV builder. No account needed. All data stays on your device. Professional templates, ATS scoring, cover letters, and interview prep — all in one app.
+            CV builder with professional templates, ATS scoring, cover letters, interview prep, and an AI recruiter review — all in one app.
           </p>
-
-          {/* Quick links */}
           <div className="grid grid-cols-2 gap-3">
             {quickLinks.map(({ to, icon: Icon, label, primary }) => (
               <Link key={to} to={to}
-                className={`flex items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-semibold shadow-sm transition-opacity hover:opacity-90 ${primary ? 'bg-primary text-primary-foreground shadow-primary/20 col-span-2 py-4 text-base shadow-lg' : 'bg-white border border-border text-foreground'}`}>
+                className={`flex items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-semibold shadow-sm transition-opacity hover:opacity-90 ${
+                  primary
+                    ? 'bg-primary text-primary-foreground shadow-primary/20 col-span-2 py-4 text-base shadow-lg'
+                    : 'bg-white border border-border text-foreground'
+                }`}>
                 <Icon size={primary ? 18 : 15} /> {label} {primary && <ArrowRight size={16} />}
               </Link>
             ))}
@@ -72,12 +74,11 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Privacy badge */}
-        <Link to="/privacy" className="mt-5 flex items-center gap-3 bg-muted rounded-2xl p-4">
+        <Link to="/privacy" className="mt-5 mb-4 flex items-center gap-3 bg-muted rounded-2xl p-4">
           <Shield size={18} className="text-primary flex-shrink-0" />
           <div className="flex-1">
-            <p className="text-xs font-semibold text-foreground">Your data stays on your device</p>
-            <p className="text-xs text-muted-foreground">No account, no server, no tracking. Tap to read the privacy policy.</p>
+            <p className="text-xs font-semibold text-foreground">Your CV data stays on your device</p>
+            <p className="text-xs text-muted-foreground">No account, no tracking. Tap to read the privacy policy.</p>
           </div>
           <ArrowRight size={14} className="text-muted-foreground flex-shrink-0" />
         </Link>

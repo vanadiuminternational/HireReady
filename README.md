@@ -1,76 +1,39 @@
-**Welcome to your Base44 project**
+# HireReady
 
-**About**
+An independent CV builder web app. ATS-friendly templates, ATS readiness score,
+cover letter generator, interview prep, and an AI-powered Recruiter X-Ray.
 
-View and Edit your app on [Base44.com](http://Base44.com)
+No Base44. No Stripe. Plain Vite + React — build and host anywhere.
 
-This project contains everything you need to run your app locally.
+## Run locally
 
----
+Prerequisites: Node.js 18 or newer.
 
-## AI Recruiter X-Ray (new feature)
-
-This repo adds a novel AI-powered feature on top of the original HireReady
-CV Engine: the **Recruiter X-Ray** (`/x-ray`).
-
-Paste your CV and a target job description, and a blunt-but-fair AI hiring
-manager tells you:
-
-- the **verdict** -- would they shortlist you, and why
-- the **three questions** a skeptical interviewer would grill you on
-- the **single line** on your CV that's hurting you most
-- a **sharpened rewrite** of your weakest bullet point
-- a few **ten-minute fixes**
-
-### How the AI is wired up
-
-The feature uses a **bring-your-own-key** model:
-
-- The user pastes their own Anthropic API key into the app.
-- The key is stored **only in the user's browser** (localStorage).
-- API calls go **directly from the user's browser to the AI provider** --
-  nothing passes through any server you run, so there is no infrastructure
-  to host and no usage cost to you.
-- Get a key at [console.anthropic.com](https://console.anthropic.com/).
-
-Relevant files:
-
-- src/lib/aiClient.js -- key storage + the API call (swap providers here)
-- src/pages/RecruiterXRay.jsx -- the feature screen
-- wired into src/App.jsx, src/components/BottomNav.jsx, src/pages/Home.jsx
-
-To later move to a hosted / paid model, replace the direct fetch in
-aiClient.js with a call to a Base44 backend function that holds the key
-server-side.
-
----
-
-**Edit the code in your local development environment**
-
-**Prerequisites:**
-
-1. Clone the repository using the project's Git URL
-2. Navigate to the project directory
-3. Install dependencies: `npm install`
-4. Create an `.env.local` file and set the right environment variables
-
-```
-VITE_BASE44_APP_ID=your_app_id
-VITE_BASE44_APP_BASE_URL=your_backend_url
-
-e.g.
-VITE_BASE44_APP_ID=cbef744a8545c389ef439ea6
-VITE_BASE44_APP_BASE_URL=https://my-to-do-list-81bfaad7.base44.app
+```bash
+npm install
+npm run dev
 ```
 
-Run the app: `npm run dev`
+The app runs at http://localhost:5173
 
-**Publish your changes**
+## Build for production
 
-Open [Base44.com](http://Base44.com) and click on Publish.
+```bash
+npm run build
+```
 
-**Docs & Support**
+Serve the `dist/` folder with nginx or any static file server on your VPS.
 
-Documentation: [https://docs.base44.com/Integrations/Using-GitHub](https://docs.base44.com/Integrations/Using-GitHub)
+## Project layout
 
-Support: [https://app.base44.com/support](https://app.base44.com/support)
+- src/pages/       — app screens (Build CV, Cover Letter, Recruiter X-Ray, etc.)
+- src/components/  — shared UI components
+- src/services/    — the rule-based CV and cover letter engines
+- src/data/        — templates, job descriptions, word lists
+- src/lib/         — utilities and the AI client
+
+## AI feature — next step
+
+The Recruiter X-Ray is at /x-ray. The next step is a small backend
+service on the VPS that holds the Anthropic API key server-side — so
+users never need their own key and pay-as-you-go limits live there.
