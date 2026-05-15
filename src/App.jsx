@@ -5,6 +5,8 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { Toaster as Sonner } from 'sonner';
 import Home from './pages/Home';
+import SmartStart from './pages/SmartStart';
+import Recommendation from './pages/Recommendation';
 import BuildCV from './pages/BuildCV';
 import Templates from './pages/Templates';
 import SavedCVs from './pages/SavedCVs';
@@ -19,6 +21,8 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/smart-start" element={<SmartStart />} />
+          <Route path="/recommendation" element={<Recommendation />} />
           <Route path="/build" element={<BuildCV />} />
           <Route path="/templates" element={<Templates />} />
           <Route path="/saved" element={<SavedCVs />} />

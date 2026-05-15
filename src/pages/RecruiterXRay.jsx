@@ -61,10 +61,10 @@ export default function RecruiterXRay() {
             <p className="text-sm font-semibold text-foreground">Transparent AI cost</p>
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            {getActionCostLabel('recruiterXRay')}. This will run through the future HireReady VPS backend, not through a user-supplied API key.
+            {getActionCostLabel('recruiterXRay')}. This will run through the future HireReady VPS backend, with provider credentials kept off the device.
           </p>
           <p className="text-[11px] text-muted-foreground mt-2 leading-relaxed">
-            Backend status: not connected yet. The button is intentionally wired to the safe backend facade so no API key is exposed in the frontend.
+            Backend status: not connected yet. The button is intentionally wired to the safe backend facade so provider credentials stay off the device.
           </p>
         </div>
 
@@ -100,7 +100,7 @@ export default function RecruiterXRay() {
               <><Sparkles size={16} /> {action.label} · {action.credits} credits</>
             )}
           </button>
-          <p className="text-[11px] text-muted-foreground text-center">Users will not need API keys. This will activate after the VPS backend is added.</p>
+          <p className="text-[11px] text-muted-foreground text-center">This will activate after the VPS backend is added.</p>
         </div>
 
         {error && (
