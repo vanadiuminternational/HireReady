@@ -16,7 +16,6 @@ import {
   Zap,
 } from 'lucide-react';
 import AppShell from '@/components/app/AppShell';
-import CreditPill from '@/components/app/CreditPill';
 import GuidanceNote from '@/components/app/GuidanceNote';
 import PremiumCard from '@/components/app/PremiumCard';
 import PrimaryAction from '@/components/app/PrimaryAction';
