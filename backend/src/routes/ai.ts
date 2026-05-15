@@ -1,11 +1,11 @@
 import { type NextFunction, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import { getAction, listAiActions } from '../orchestrator/actions.js';
-import { getCachedResult, getCacheStats, setCachedResult } from '../orchestrator/cache.js';
+import { getCacheStats, setCachedResult } from '../orchestrator/cache.js';
 import { checkCostGuard } from '../orchestrator/costGuard.js';
 import { chargeCredits, refundCredits, reserveCredits } from '../orchestrator/credits.js';
 import { buildActionInputHash } from '../orchestrator/hash.js';
-import { createRequestLog, getRecentRequestLogs, getRequestLogStats, updateRequestLog } from '../orchestrator/requestLog.js';
+import { createRequestLog, getRequestLogStats, updateRequestLog } from '../orchestrator/requestLog.js';
 import { planRoute } from '../orchestrator/router.js';
 import { validateRecruiterXrayResult } from '../orchestrator/validator.js';
 import { mockProvider } from '../providers/mockProvider.js';
@@ -18,15 +18,20 @@ aiRouter.get('/actions', (_req: Request, res: Response) => {
   res.json({ actions: listAiActions() });
 });
 
+async function getLatestRequest(requestId: string) {
+  const recent = await aiStorage.getRecentRequests(25);
+  return recent.find((entry) => entry.requestId === requestId) ?? recent[0] ?? null;
+}
+
 aiRouter.get('/debug/stats', async (_req: Request, res: Response) => {
   res.json({
-    cache: getCacheStats(),
-    requests: getRequestLogStats(),
-    recentRequests: getRecentRequestLogs(10),
+    memoryCache: getCacheStats(),
+    memoryRequests: getRequestLogStats(),
+    recentRequests: await aiStorage.getRecentRequests(10),
     storage: await aiStorage.getStats(),
     scaffold: {
       liveAi: false,
-      note: 'Scaffold stats only. Use authenticated observability before production live AI.',
+      note: 'Storage-backed scaffold stats. Use authenticated observability before production live AI.',
     },
   });
 });
@@ -72,7 +77,7 @@ aiRouter.post('/recruiter-xray', async (req: Request, res: Response) => {
     modelTier: routePlan.modelTier,
   });
 
-  const cached = action.cacheable ? getCachedResult(inputHash) : null;
+  const cached = action.cacheable ? await aiStorage.getCacheEntry(inputHash) : null;
   if (cached) {
     updateRequestLog(requestLog.requestId, {
       status: 'cache_hit',
@@ -106,7 +111,7 @@ aiRouter.post('/recruiter-xray', async (req: Request, res: Response) => {
       result: cached.result,
       provider: {
         id: 'cache',
-        model: 'cached-result',
+        model: 'storage-backed-cache',
         usage: {
           inputTokens: 0,
           outputTokens: 0,
@@ -120,11 +125,12 @@ aiRouter.post('/recruiter-xray', async (req: Request, res: Response) => {
         inputHash,
         createdAt: cached.createdAt,
         hits: cached.hits,
+        source: 'selected-storage-driver',
       },
-      request: getRecentRequestLogs(1)[0],
+      request: await getLatestRequest(requestLog.requestId),
       scaffold: {
         liveAi: false,
-        note: 'Returned from in-memory scaffold cache. No live AI provider was called.',
+        note: 'Returned from selected storage driver cache. No live AI provider was called.',
       },
     });
     return;
@@ -246,8 +252,9 @@ aiRouter.post('/recruiter-xray', async (req: Request, res: Response) => {
         hit: false,
         inputHash,
         stored: Boolean(cachedResult),
+        source: 'selected-storage-driver',
       },
-      request: getRecentRequestLogs(1)[0],
+      request: await getLatestRequest(requestLog.requestId),
       scaffold: {
         liveAi: false,
         note: 'Mock provider only. No live AI provider was called.',
