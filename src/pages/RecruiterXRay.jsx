@@ -1,39 +1,28 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Eye, Key, Loader2, AlertCircle, ArrowLeft, Sparkles,
-  MessageCircleQuestion, AlertTriangle, Wand2, Zap, CheckCircle2,
+  Eye, Loader2, AlertCircle, ArrowLeft, Sparkles,
+  MessageCircleQuestion, AlertTriangle, Wand2, Zap, CheckCircle2, Coins,
 } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
-import { apiKeyStore, runRecruiterXRay } from '@/lib/aiClient';
+import { runRecruiterXRay } from '@/lib/aiClient';
+import { getActionCostLabel, AI_ACTIONS } from '@/engine/credits';
 
 export default function RecruiterXRay() {
-  const [apiKey, setApiKey] = useState(() => apiKeyStore.get());
-  const [keySaved, setKeySaved] = useState(() => !!apiKeyStore.get());
   const [cv, setCv] = useState('');
   const [jobDescription, setJobDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
 
-  const saveKey = () => {
-    apiKeyStore.set(apiKey);
-    setKeySaved(!!apiKey.trim());
-    setError('');
-  };
-
-  const clearKey = () => {
-    apiKeyStore.clear();
-    setApiKey('');
-    setKeySaved(false);
-  };
+  const action = AI_ACTIONS.recruiterXRay;
 
   const handleRun = async () => {
     setError('');
     setResult(null);
     setLoading(true);
     try {
-      const data = await runRecruiterXRay({ cv, jobDescription, apiKey });
+      const data = await runRecruiterXRay({ cv, jobDescription });
       setResult(data);
     } catch (e) {
       setError(e.message || 'Something went wrong.');
@@ -44,7 +33,6 @@ export default function RecruiterXRay() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      {/* Header */}
       <div className="bg-gradient-to-br from-accent/10 via-primary/5 to-background px-5 pt-12 pb-7">
         <div className="max-w-lg mx-auto">
           <Link to="/" className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground mb-4">
@@ -61,53 +49,25 @@ export default function RecruiterXRay() {
             <span className="text-accent">hiring manager's eyes</span>
           </h1>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Paste your CV and a job description. A blunt-but-fair AI hiring manager tells you the questions they'd grill you on, the line that's hurting you, and how to sharpen it.
+            Paste your CV and a job description. A blunt-but-fair AI hiring manager will later review the fit, questions, weak lines, and quick fixes.
           </p>
         </div>
       </div>
 
       <div className="px-5 pt-6 max-w-lg mx-auto space-y-5">
-        {/* API key card */}
         <div className="bg-white rounded-2xl border border-border p-4 shadow-sm">
           <div className="flex items-center gap-2 mb-2">
-            <Key size={15} className="text-primary" />
-            <p className="text-sm font-semibold text-foreground">Your AI API key</p>
-            {keySaved && (
-              <span className="ml-auto inline-flex items-center gap-1 text-[11px] font-medium text-primary">
-                <CheckCircle2 size={12} /> Saved
-              </span>
-            )}
+            <Coins size={15} className="text-primary" />
+            <p className="text-sm font-semibold text-foreground">Transparent AI cost</p>
           </div>
-          <p className="text-xs text-muted-foreground leading-relaxed mb-3">
-            Bring your own Anthropic API key. It's stored only in this browser and sent straight to the AI — never to any server we run. Get one at{' '}
-            <a href="https://console.anthropic.com/" target="_blank" rel="noreferrer" className="text-accent underline">
-              console.anthropic.com
-            </a>.
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            {getActionCostLabel('recruiterXRay')}. This will run through the future HireReady VPS backend, not through a user-supplied API key.
           </p>
-          <div className="flex gap-2">
-            <input
-              type="password"
-              value={apiKey}
-              onChange={(e) => { setApiKey(e.target.value); setKeySaved(false); }}
-              placeholder="sk-ant-..."
-              className="flex-1 rounded-xl border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
-            />
-            <button
-              onClick={saveKey}
-              disabled={!apiKey.trim()}
-              className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-40"
-            >
-              Save
-            </button>
-          </div>
-          {keySaved && (
-            <button onClick={clearKey} className="mt-2 text-[11px] text-muted-foreground underline">
-              Remove key from this device
-            </button>
-          )}
+          <p className="text-[11px] text-muted-foreground mt-2 leading-relaxed">
+            Backend status: not connected yet. The button is intentionally wired to the safe backend facade so no API key is exposed in the frontend.
+          </p>
         </div>
 
-        {/* Inputs */}
         <div className="bg-white rounded-2xl border border-border p-4 shadow-sm space-y-4">
           <div>
             <label className="text-sm font-semibold text-foreground mb-1.5 block">Your CV</label>
@@ -131,38 +91,32 @@ export default function RecruiterXRay() {
           </div>
           <button
             onClick={handleRun}
-            disabled={loading || !keySaved || !cv.trim() || !jobDescription.trim()}
+            disabled={loading || !cv.trim() || !jobDescription.trim()}
             className="w-full flex items-center justify-center gap-2 rounded-xl bg-accent py-3 text-sm font-semibold text-accent-foreground shadow-lg shadow-accent/20 disabled:opacity-40 disabled:shadow-none transition-opacity"
           >
             {loading ? (
               <><Loader2 size={16} className="animate-spin" /> Reading your CV...</>
             ) : (
-              <><Sparkles size={16} /> Run the X-Ray</>
+              <><Sparkles size={16} /> {action.label} · {action.credits} credits</>
             )}
           </button>
-          {!keySaved && (
-            <p className="text-[11px] text-muted-foreground text-center">Save your API key above to enable this.</p>
-          )}
+          <p className="text-[11px] text-muted-foreground text-center">Users will not need API keys. This will activate after the VPS backend is added.</p>
         </div>
 
-        {/* Error */}
         {error && (
-          <div className="flex items-start gap-2 bg-destructive/10 border border-destructive/30 rounded-2xl p-4">
-            <AlertCircle size={16} className="text-destructive flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-destructive leading-relaxed">{error}</p>
+          <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-2xl p-4">
+            <AlertCircle size={16} className="text-amber-700 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-amber-800 leading-relaxed">{error}</p>
           </div>
         )}
 
-        {/* Result */}
         {result && (
           <div className="space-y-3">
-            {/* Verdict */}
             <div className="bg-charcoal text-white rounded-2xl p-4">
               <p className="text-[11px] font-semibold uppercase tracking-widest text-white/50 mb-1">The verdict</p>
               <p className="text-sm leading-relaxed font-medium">{result.verdict}</p>
             </div>
 
-            {/* Questions */}
             {Array.isArray(result.questions) && result.questions.length > 0 && (
               <div className="bg-white rounded-2xl border border-border p-4 shadow-sm">
                 <div className="flex items-center gap-2 mb-2.5">
@@ -180,7 +134,6 @@ export default function RecruiterXRay() {
               </div>
             )}
 
-            {/* Weakest line */}
             {result.weakest_line && (
               <div className="bg-white rounded-2xl border border-destructive/30 p-4 shadow-sm">
                 <div className="flex items-center gap-2 mb-2">
@@ -191,7 +144,6 @@ export default function RecruiterXRay() {
               </div>
             )}
 
-            {/* Rewritten bullet */}
             {result.rewritten_bullet && (
               <div className="bg-white rounded-2xl border border-primary/30 p-4 shadow-sm">
                 <div className="flex items-center gap-2 mb-2">
@@ -202,7 +154,6 @@ export default function RecruiterXRay() {
               </div>
             )}
 
-            {/* Quick wins */}
             {Array.isArray(result.quick_wins) && result.quick_wins.length > 0 && (
               <div className="bg-white rounded-2xl border border-border p-4 shadow-sm">
                 <div className="flex items-center gap-2 mb-2.5">
@@ -219,10 +170,6 @@ export default function RecruiterXRay() {
                 </ul>
               </div>
             )}
-
-            <p className="text-[11px] text-muted-foreground text-center px-4 leading-relaxed">
-              AI feedback is a second opinion, not gospel. Trust your own judgement on what's true about your experience.
-            </p>
           </div>
         )}
       </div>

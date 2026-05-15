@@ -1,29 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
-import { base44 } from '@/api/base44Client';
+// HireReady is now independent of Base44 and Stripe.
+// This compatibility hook keeps older UI code safe until the v2 credit system replaces Pro gating.
 
-/**
- * Hook to check if the current user has Pro access.
- * Returns { isPro, loading, refresh }
- */
 export function useProAccess() {
-  const [isPro, setIsPro] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  const check = useCallback(async () => {
-    try {
-      setLoading(true);
-      const res = await base44.functions.invoke('verifyProAccess', {});
-      setIsPro(res.data?.isPro === true);
-    } catch {
-      setIsPro(false);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    check();
-  }, [check]);
-
-  return { isPro, loading, refresh: check };
+  return {
+    isPro: false,
+    loading: false,
+    refresh: () => {},
+  };
 }
