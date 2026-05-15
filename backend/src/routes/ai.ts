@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { type NextFunction, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import { getAction, listAiActions } from '../orchestrator/actions.js';
 import { checkCostGuard } from '../orchestrator/costGuard.js';
@@ -10,11 +10,11 @@ import { recruiterXrayRequestSchema } from '../schemas/recruiterXray.js';
 
 export const aiRouter = Router();
 
-aiRouter.get('/actions', (_req, res) => {
+aiRouter.get('/actions', (_req: Request, res: Response) => {
   res.json({ actions: listAiActions() });
 });
 
-aiRouter.post('/recruiter-xray', async (req, res) => {
+aiRouter.post('/recruiter-xray', async (req: Request, res: Response) => {
   const action = getAction('recruiter_xray');
   if (!action) {
     res.status(500).json({ error: 'Recruiter X-Ray action is not registered.' });
@@ -94,7 +94,7 @@ aiRouter.post('/recruiter-xray', async (req, res) => {
   }
 });
 
-aiRouter.use((err: unknown, _req, res, _next) => {
+aiRouter.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   if (err instanceof z.ZodError) {
     res.status(400).json({ error: 'Invalid request.', details: err.issues });
     return;
