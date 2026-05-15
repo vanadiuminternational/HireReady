@@ -39,3 +39,35 @@ jobs:
             echo "Forbidden Base44, Stripe, or direct browser AI dependency found."
             exit 1
           fi
+
+  backend-checks:
+    name: Backend typecheck and build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm install
+
+      - name: Typecheck backend
+        working-directory: backend
+        run: npm run typecheck
+
+      - name: Build backend
+        working-directory: backend
+        run: npm run build
+
+      - name: Verify backend remains mock-only
+        run: |
+          if grep -R "OPENAI_API_KEY\|ANTHROPIC_API_KEY\|GEMINI_API_KEY\|dangerouslyAllowBrowser\|anthropic-dangerous-direct-browser-access" backend/src --exclude-dir=node_modules --exclude-dir=dist; then
+            echo "Live provider key handling or unsafe browser AI pattern found in scaffold."
+            exit 1
+          fi
