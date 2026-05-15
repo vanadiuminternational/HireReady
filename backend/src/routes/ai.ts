@@ -10,7 +10,7 @@ import { planRoute } from '../orchestrator/router.js';
 import { validateRecruiterXrayResult } from '../orchestrator/validator.js';
 import { mockProvider } from '../providers/mockProvider.js';
 import { recruiterXrayRequestSchema } from '../schemas/recruiterXray.js';
-import { aiStorage } from '../storage/memoryStorage.js';
+import { aiStorage } from '../storage/storageFactory.js';
 
 export const aiRouter = Router();
 
@@ -26,7 +26,7 @@ aiRouter.get('/debug/stats', async (_req: Request, res: Response) => {
     storage: await aiStorage.getStats(),
     scaffold: {
       liveAi: false,
-      note: 'In-memory scaffold stats only. Not for production persistence.',
+      note: 'Scaffold stats only. Use authenticated observability before production live AI.',
     },
   });
 });
