@@ -1,0 +1,41 @@
+name: HireReady CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  web-and-capacitor-checks:
+    name: Web build, lint, and Capacitor sync
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Build Vite app
+        run: npm run build
+
+      - name: Sync Capacitor Android project
+        run: npx cap sync android
+
+      - name: Verify no Base44 or Stripe runtime dependencies are present
+        run: |
+          if grep -R "@base44\|base44Client\|createCheckout\|verifyProAccess\|@stripe\|stripe-js\|anthropic-dangerous-direct-browser-access" package.json package-lock.json src android --exclude-dir=node_modules --exclude-dir=.git; then
+            echo "Forbidden Base44, Stripe, or direct browser AI dependency found."
+            exit 1
+          fi
