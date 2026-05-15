@@ -1,113 +1,107 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Layout, ChevronDown, ChevronUp, Copy, Check, ArrowRight, Shield } from 'lucide-react';
-import BottomNav from '@/components/BottomNav';
+import { ArrowRight, Check, ChevronDown, ChevronUp, Copy, Layout, Shield } from 'lucide-react';
+import AppShell from '@/components/app/AppShell';
+import GuidanceNote from '@/components/app/GuidanceNote';
+import PremiumCard from '@/components/app/PremiumCard';
+import PrimaryAction from '@/components/app/PrimaryAction';
+import SecondaryAction from '@/components/app/SecondaryAction';
+import SectionHeader from '@/components/app/SectionHeader';
 import { TEMPLATE_RULES } from '@/data/templateRules';
 import { copyToClipboard } from '@/services/exportService';
 import { toast } from 'sonner';
 
-const colorMap = {
-  blue: { bg: 'bg-blue-50', border: 'border-blue-200', badge: 'bg-blue-100 text-blue-700', dot: 'bg-blue-400' },
-  emerald: { bg: 'bg-emerald-50', border: 'border-emerald-200', badge: 'bg-emerald-100 text-emerald-700', dot: 'bg-emerald-400' },
-  navy: { bg: 'bg-slate-50', border: 'border-slate-200', badge: 'bg-slate-100 text-slate-700', dot: 'bg-slate-500' },
-  purple: { bg: 'bg-purple-50', border: 'border-purple-200', badge: 'bg-purple-100 text-purple-700', dot: 'bg-purple-400' },
-};
+function formatSection(section) {
+  return section.replace(/([A-Z])/g, ' $1').replace(/^./, (letter) => letter.toUpperCase());
+}
 
 function TemplateCard({ template, onUse }) {
   const [expanded, setExpanded] = useState(false);
   const [copiedSummary, setCopiedSummary] = useState(false);
   const [copiedBullets, setCopiedBullets] = useState(false);
-  const colors = colorMap[template.color] || colorMap.blue;
 
   const handleCopy = async (text, setter) => {
     const copiedToClipboard = await copyToClipboard(text);
     if (copiedToClipboard) {
       setter(true);
-      toast.success('Copied!');
-      setTimeout(() => setter(false), 2000);
+      toast.success('Copied.');
+      setTimeout(() => setter(false), 1800);
     } else {
       toast.error('Copy failed. Select the text manually.');
     }
   };
 
   return (
-    <div className={`rounded-2xl border ${colors.border} ${colors.bg} p-4`}>
-      <div className="flex items-start justify-between mb-2">
-        <div className="flex-1">
-          <h3 className="font-semibold text-foreground text-sm">{template.name}</h3>
-          <p className="text-xs text-muted-foreground mt-0.5">{template.bestFor}</p>
+    <PremiumCard className="space-y-4 p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-extrabold text-charcoal">{template.name}</p>
+          <p className="mt-1 text-xs font-medium leading-5 text-charcoal/55">{template.bestFor}</p>
         </div>
-        <span className={`text-xs font-medium px-2.5 py-1 rounded-full flex items-center gap-1 flex-shrink-0 ml-2 ${colors.badge}`}>
-          <Shield size={10} /> {template.atsLabel}
+        <span className="flex shrink-0 items-center gap-1 rounded-full border border-primary/15 bg-primary/10 px-2.5 py-1 text-[11px] font-extrabold text-primary">
+          <Shield size={11} /> {template.atsLabel}
         </span>
       </div>
 
-      <p className="text-xs text-muted-foreground mb-3">{template.description}</p>
+      <p className="text-xs font-medium leading-5 text-charcoal/58">{template.description}</p>
 
-      {/* Section order */}
-      <div className="mb-3">
-        <p className="text-xs font-medium text-foreground mb-1.5">Section order:</p>
+      <div className="rounded-[1.25rem] bg-black/4 p-3">
+        <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-charcoal/42">Section order</p>
         <div className="flex flex-wrap gap-1.5">
-          {template.sectionOrder.map((s, i) => (
-            <span key={i} className="text-xs bg-white border border-border rounded-full px-2.5 py-0.5 text-foreground capitalize">
-              {s.replace(/([A-Z])/g, ' $1')}
+          {template.sectionOrder.map((section, index) => (
+            <span key={`${section}-${index}`} className="rounded-full border border-black/7 bg-white/80 px-2.5 py-1 text-[11px] font-bold text-charcoal/65">
+              {formatSection(section)}
             </span>
           ))}
         </div>
       </div>
 
-      {/* Expand for examples */}
-      <button onClick={() => setExpanded(v => !v)}
-        className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium mb-3">
-        {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-        {expanded ? 'Hide examples' : 'Show examples & skills'}
+      <button onClick={() => setExpanded((value) => !value)} className="flex w-full items-center justify-between rounded-2xl border border-black/7 bg-white/78 px-3 py-3 text-xs font-extrabold text-charcoal shadow-sm">
+        <span>{expanded ? 'Hide examples' : 'Show examples and skills'}</span>
+        {expanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
       </button>
 
       {expanded && (
-        <div className="space-y-3 mb-3">
-          {/* Example summary */}
-          <div className="bg-white rounded-xl border border-border p-3 space-y-2">
-            <div className="flex justify-between items-center">
-              <p className="text-xs font-semibold text-foreground">Example Summary</p>
-              <button onClick={() => handleCopy(template.exampleSummary, setCopiedSummary)}
-                className="flex items-center gap-1 text-xs text-primary font-medium">
-                {copiedSummary ? <Check size={11} /> : <Copy size={11} />} Copy
+        <div className="space-y-3">
+          <div className="rounded-[1.35rem] border border-black/7 bg-white/82 p-3 shadow-sm">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <p className="text-xs font-extrabold text-charcoal">Example summary</p>
+              <button onClick={() => handleCopy(template.exampleSummary, setCopiedSummary)} className="flex items-center gap-1 text-xs font-extrabold text-primary">
+                {copiedSummary ? <Check size={12} /> : <Copy size={12} />} Copy
               </button>
             </div>
-            <p className="text-xs text-muted-foreground leading-relaxed italic">"{template.exampleSummary}"</p>
+            <p className="text-xs italic leading-5 text-charcoal/58">“{template.exampleSummary}”</p>
           </div>
 
-          {/* Example skills */}
-          <div className="bg-white rounded-xl border border-border p-3 space-y-2">
-            <p className="text-xs font-semibold text-foreground">Example Skills</p>
+          <div className="rounded-[1.35rem] border border-black/7 bg-white/82 p-3 shadow-sm">
+            <p className="mb-2 text-xs font-extrabold text-charcoal">Example skills</p>
             <div className="flex flex-wrap gap-1.5">
-              {template.exampleSkills.map((skill, i) => (
-                <span key={i} className="text-xs bg-muted rounded-full px-2.5 py-0.5 text-foreground">{skill}</span>
+              {template.exampleSkills.map((skill, index) => (
+                <span key={`${skill}-${index}`} className="rounded-full bg-black/5 px-2.5 py-1 text-[11px] font-bold text-charcoal/68">{skill}</span>
               ))}
             </div>
           </div>
 
-          {/* Example bullets */}
-          <div className="bg-white rounded-xl border border-border p-3 space-y-2">
-            <div className="flex justify-between items-center">
-              <p className="text-xs font-semibold text-foreground">Example Bullet Points</p>
-              <button onClick={() => handleCopy(template.exampleBullets.map(b => `• ${b}`).join('\n'), setCopiedBullets)}
-                className="flex items-center gap-1 text-xs text-primary font-medium">
-                {copiedBullets ? <Check size={11} /> : <Copy size={11} />} Copy
+          <div className="rounded-[1.35rem] border border-black/7 bg-white/82 p-3 shadow-sm">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <p className="text-xs font-extrabold text-charcoal">Example bullet points</p>
+              <button onClick={() => handleCopy(template.exampleBullets.map((bullet) => `• ${bullet}`).join('\n'), setCopiedBullets)} className="flex items-center gap-1 text-xs font-extrabold text-primary">
+                {copiedBullets ? <Check size={12} /> : <Copy size={12} />} Copy
               </button>
             </div>
-            {template.exampleBullets.map((b, i) => (
-              <p key={i} className="text-xs text-muted-foreground leading-relaxed">• {b}</p>
-            ))}
+            <div className="space-y-2">
+              {template.exampleBullets.map((bullet, index) => (
+                <p key={`${bullet}-${index}`} className="text-xs font-medium leading-5 text-charcoal/58">• {bullet}</p>
+              ))}
+            </div>
           </div>
         </div>
       )}
 
-      <button onClick={() => onUse && onUse(template)}
-        className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground text-sm font-medium rounded-xl py-2.5 transition-opacity hover:opacity-90">
-        Use This Template <ArrowRight size={15} />
-      </button>
-    </div>
+      <PrimaryAction onClick={() => onUse && onUse(template)} icon={ArrowRight}>
+        Use this template
+      </PrimaryAction>
+    </PremiumCard>
   );
 }
 
@@ -116,27 +110,53 @@ export default function Templates() {
   const templates = Object.values(TEMPLATE_RULES);
 
   return (
-    <div className="min-h-screen bg-background pb-24">
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border px-5 py-4">
-        <div className="max-w-lg mx-auto flex items-center gap-3">
-          <Layout size={20} className="text-primary" />
-          <div>
-            <h1 className="text-base font-bold text-foreground">CV Templates</h1>
-            <p className="text-xs text-muted-foreground">{templates.length} ATS-safe templates</p>
+    <AppShell contentClassName="space-y-4 pb-5">
+      <PremiumCard tone="dark" className="overflow-hidden p-0">
+        <div className="bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.22),transparent_13rem)] p-5">
+          <div className="mb-4 flex items-start justify-between gap-4">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/42">ATS-safe library</p>
+              <h1 className="mt-2 text-[1.65rem] font-extrabold leading-tight text-white">Choose the right CV structure.</h1>
+              <p className="mt-2 text-sm font-medium leading-6 text-white/58">
+                Clean one-column templates with safe section order and practical examples.
+              </p>
+            </div>
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-white">
+              <Layout size={22} />
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-2xl bg-white/10 px-3 py-2.5">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/38">Templates</p>
+              <p className="mt-1 text-xs font-bold text-white/82">{templates.length}</p>
+            </div>
+            <div className="rounded-2xl bg-white/10 px-3 py-2.5">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/38">Format</p>
+              <p className="mt-1 text-xs font-bold text-white/82">ATS-safe</p>
+            </div>
           </div>
         </div>
-      </div>
+      </PremiumCard>
 
-      <div className="px-5 pt-5 max-w-lg mx-auto space-y-4">
-        {templates.map(t => (
-          <TemplateCard key={t.id} template={t} onUse={(tmpl) => navigate(`/build?template=${tmpl.id}`)} />
+      <GuidanceNote variant="lock">
+        These are structure rules and examples. Export styling still happens through the CV result screen.
+      </GuidanceNote>
+
+      <div className="space-y-3">
+        {templates.map((template) => (
+          <TemplateCard key={template.id} template={template} onUse={(selected) => navigate(`/build?template=${selected.id}`)} />
         ))}
-        <p className="text-xs text-muted-foreground text-center pb-4">
-          All templates use one-column, ATS-safe formatting. No tables, photos, or graphics.
-        </p>
       </div>
 
-      <BottomNav />
-    </div>
+      <PremiumCard className="p-4">
+        <SectionHeader
+          eyebrow="Safety note"
+          title="Simple beats over-designed"
+          description="All templates avoid tables, photos, heavy graphics, and layout tricks that can confuse ATS parsing."
+          action={<Shield size={18} className="text-primary" />}
+          className="mb-0"
+        />
+      </PremiumCard>
+    </AppShell>
   );
 }
