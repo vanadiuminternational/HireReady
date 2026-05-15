@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Check, Copy, Edit3, FileText, X } from 'lucide-react';
 import GuidanceNote from '@/components/app/GuidanceNote';
+import { copyToClipboard } from '@/services/exportService';
 import { toast } from 'sonner';
 
 function PreviewAction({ onClick, icon: Icon, children, variant = 'light' }) {
@@ -36,12 +37,12 @@ export default function CvPreview({ cvText, onTextChange }) {
   }, [cvText]);
 
   const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(cvText || '');
+    const copiedToClipboard = await copyToClipboard(cvText || '');
+    if (copiedToClipboard) {
       setCopied(true);
       toast.success('Copied to clipboard.');
       setTimeout(() => setCopied(false), 2000);
-    } catch {
+    } else {
       toast.error('Copy failed. Select the text manually.');
     }
   };

@@ -15,7 +15,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { getSampleJobDescription } from '@/data/sampleJobDescriptions';
-import { exportToPdf } from '@/services/exportService';
+import { copyToClipboard, exportToPdf } from '@/services/exportService';
 import AppShell from '@/components/app/AppShell';
 import CreditPill from '@/components/app/CreditPill';
 import GuidanceNote from '@/components/app/GuidanceNote';
@@ -125,12 +125,12 @@ function LetterPreview({ letterText, setLetterText }) {
   const words = letterText.trim() ? letterText.trim().split(/\s+/).length : 0;
 
   const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(letterText || '');
+    const copiedToClipboard = await copyToClipboard(letterText || '');
+    if (copiedToClipboard) {
       setCopied(true);
       toast.success('Copied to clipboard.');
       setTimeout(() => setCopied(false), 1800);
-    } catch {
+    } else {
       toast.error('Copy failed. Select the text manually.');
     }
   };
@@ -328,7 +328,17 @@ export default function CoverLetter() {
               ) : (
                 <SecondaryAction className="bg-white/10 text-white/70">Saved</SecondaryAction>
               )}
-              <SecondaryAction onClick={() => { navigator.clipboard.writeText(letterText); toast.success('Copied to clipboard.'); }} icon={Copy} className="bg-white/10 text-white hover:bg-white/15">Copy</SecondaryAction>
+              <SecondaryAction
+                onClick={async () => {
+                  const copiedToClipboard = await copyToClipboard(letterText);
+                  if (copiedToClipboard) toast.success('Copied to clipboard.');
+                  else toast.error('Copy failed. Select the text manually.');
+                }}
+                icon={Copy}
+                className="bg-white/10 text-white hover:bg-white/15"
+              >
+                Copy
+              </SecondaryAction>
               <SecondaryAction onClick={() => { exportToPdf(letterText, `Cover_Letter_${form.targetJobTitle || 'Letter'}_${new Date().getFullYear()}`); toast.success('PDF downloaded.'); }} icon={Download} className="bg-white text-charcoal hover:bg-white/92">PDF</SecondaryAction>
             </div>
           </div>

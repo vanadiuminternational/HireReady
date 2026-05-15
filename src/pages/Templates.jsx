@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Layout, ChevronDown, ChevronUp, Copy, Check, ArrowRight, Shield } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 import { TEMPLATE_RULES } from '@/data/templateRules';
+import { copyToClipboard } from '@/services/exportService';
 import { toast } from 'sonner';
 
 const colorMap = {
@@ -18,11 +19,15 @@ function TemplateCard({ template, onUse }) {
   const [copiedBullets, setCopiedBullets] = useState(false);
   const colors = colorMap[template.color] || colorMap.blue;
 
-  const handleCopy = (text, setter) => {
-    navigator.clipboard.writeText(text);
-    setter(true);
-    toast.success('Copied!');
-    setTimeout(() => setter(false), 2000);
+  const handleCopy = async (text, setter) => {
+    const copiedToClipboard = await copyToClipboard(text);
+    if (copiedToClipboard) {
+      setter(true);
+      toast.success('Copied!');
+      setTimeout(() => setter(false), 2000);
+    } else {
+      toast.error('Copy failed. Select the text manually.');
+    }
   };
 
   return (

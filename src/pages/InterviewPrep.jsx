@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ChevronDown, ChevronUp, Copy, Check } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 import { INTERVIEW_QUESTIONS, STAR_GUIDE, EXAMPLE_ANSWERS, QUESTIONS_TO_ASK, INTERVIEW_CHECKLIST } from '@/data/interviewData';
+import { copyToClipboard } from '@/services/exportService';
 import { toast } from 'sonner';
 
 const TABS = ['Questions', 'STAR Method', 'Example Answers', 'Ask Them', 'Checklist'];
@@ -36,11 +37,15 @@ const QuestionCard = ({ q }) => {
 const AnswerCard = ({ item }) => {
   const [copied, setCopied] = useState(false);
   const [open, setOpen] = useState(false);
-  const handleCopy = () => {
-    navigator.clipboard.writeText(item.answer);
-    setCopied(true);
-    toast.success('Answer copied!');
-    setTimeout(() => setCopied(false), 2000);
+  const handleCopy = async () => {
+    const copiedToClipboard = await copyToClipboard(item.answer);
+    if (copiedToClipboard) {
+      setCopied(true);
+      toast.success('Answer copied!');
+      setTimeout(() => setCopied(false), 2000);
+    } else {
+      toast.error('Copy failed. Select the text manually.');
+    }
   };
   return (
     <div className="bg-white rounded-2xl border border-border p-4 shadow-sm">
