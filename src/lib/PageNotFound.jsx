@@ -22,7 +22,7 @@ export default function PageNotFound() {
         <div className="bg-primary/5 rounded-2xl p-4 text-left">
           <p className="text-xs font-semibold text-foreground mb-1">No problem.</p>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Go back home and continue building your CV, cover letter, or interview prep. No login or Base44 check is needed.
+            Go back home and continue building your CV, cover letter, or interview prep. No login check is needed.
           </p>
         </div>
 

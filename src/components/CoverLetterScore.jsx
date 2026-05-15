@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, Target, AlertTriangle, CheckCircle, XCircle, Lightbulb, Info } from 'lucide-react';
+import { ChevronDown, ChevronUp, Target, AlertTriangle, CheckCircle, XCircle, Info } from 'lucide-react';
 
 const ScoreBar = ({ label, score, max }) => {
   const pct = Math.round((score / max) * 100);

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Copy, Check, FileText, Zap, ChevronLeft, Save, Wand2, Download } from 'lucide-react';
+import { Copy, Check, Zap, ChevronLeft, Save, Wand2, Download } from 'lucide-react';
 import { getSampleJobDescription } from '@/data/sampleJobDescriptions';
 import { exportToPdf } from '@/services/exportService';
 import BottomNav from '@/components/BottomNav';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTriangle, CheckCircle, Lightbulb } from 'lucide-react';
+import { AlertTriangle, Lightbulb } from 'lucide-react';
 
 export default function AtsScoreCard({ atsResult }) {
   if (!atsResult) return null;
