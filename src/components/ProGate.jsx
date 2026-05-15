@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Crown, Lock } from 'lucide-react';
 
 /**
@@ -21,10 +20,9 @@ export default function ProGate({ isPro, loading, children, featureName }) {
         </div>
         <p className="text-sm font-bold text-foreground mb-1">Pro Feature</p>
         {featureName && <p className="text-xs text-muted-foreground mb-3">{featureName} is available on Pro.</p>}
-        <Link to="/pro"
-          className="flex items-center gap-1.5 bg-primary text-primary-foreground text-xs font-semibold rounded-xl px-4 py-2.5">
-          <Lock size={12} /> Upgrade to Pro
-        </Link>
+        <div className="flex items-center gap-1.5 bg-muted text-muted-foreground text-xs font-semibold rounded-xl px-4 py-2.5">
+          <Lock size={12} /> Credit system coming later
+        </div>
       </div>
     </div>
   );
