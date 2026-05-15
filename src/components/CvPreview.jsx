@@ -1,17 +1,49 @@
-import React, { useState } from 'react';
-import { Copy, Check, Edit3, X } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Check, Copy, Edit3, FileText, X } from 'lucide-react';
+import GuidanceNote from '@/components/app/GuidanceNote';
 import { toast } from 'sonner';
+
+function PreviewAction({ onClick, icon: Icon, children, variant = 'light' }) {
+  const styles = variant === 'dark'
+    ? 'bg-charcoal text-white border-charcoal'
+    : 'bg-white/82 text-charcoal border-black/7';
+
+  return (
+    <button
+      onClick={onClick}
+      className={`flex min-h-9 items-center justify-center gap-1.5 rounded-2xl border px-3 text-xs font-extrabold shadow-sm transition active:scale-[0.98] ${styles}`}
+    >
+      <Icon size={13} />
+      {children}
+    </button>
+  );
+}
 
 export default function CvPreview({ cvText, onTextChange }) {
   const [editing, setEditing] = useState(false);
-  const [editText, setEditText] = useState(cvText);
+  const [editText, setEditText] = useState(cvText || '');
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(cvText);
-    setCopied(true);
-    toast.success('CV copied to clipboard!');
-    setTimeout(() => setCopied(false), 2000);
+  useEffect(() => {
+    if (!editing) setEditText(cvText || '');
+  }, [cvText, editing]);
+
+  const stats = useMemo(() => {
+    const text = cvText || '';
+    const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+    const lines = text.split('\n').filter((line) => line.trim()).length;
+    return { words, lines };
+  }, [cvText]);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(cvText || '');
+      setCopied(true);
+      toast.success('Copied to clipboard.');
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error('Copy failed. Select the text manually.');
+    }
   };
 
   const handleSaveEdit = () => {
@@ -22,30 +54,37 @@ export default function CvPreview({ cvText, onTextChange }) {
 
   return (
     <div className="space-y-3">
-      <div className="flex justify-between items-center">
-        <span className="text-sm font-semibold text-foreground">CV Preview</span>
-        <div className="flex gap-2">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <FileText size={18} />
+          </span>
+          <div>
+            <p className="text-sm font-extrabold text-charcoal">Document preview</p>
+            <p className="text-xs font-medium text-charcoal/50">{stats.words} words · {stats.lines} filled lines</p>
+          </div>
+        </div>
+
+        <div className="flex shrink-0 gap-2">
           {!editing ? (
             <>
-              <button onClick={() => { setEditText(cvText); setEditing(true); }}
-                className="flex items-center gap-1.5 text-xs text-blue-600 bg-blue-50 border border-blue-200 rounded-lg px-3 py-1.5 font-medium">
-                <Edit3 size={13} /> Edit
-              </button>
-              <button onClick={handleCopy}
-                className="flex items-center gap-1.5 text-xs text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-1.5 font-medium">
-                {copied ? <Check size={13} /> : <Copy size={13} />} {copied ? 'Copied' : 'Copy'}
-              </button>
+              {onTextChange && (
+                <PreviewAction onClick={() => { setEditText(cvText || ''); setEditing(true); }} icon={Edit3}>
+                  Edit
+                </PreviewAction>
+              )}
+              <PreviewAction onClick={handleCopy} icon={copied ? Check : Copy} variant="dark">
+                {copied ? 'Copied' : 'Copy'}
+              </PreviewAction>
             </>
           ) : (
             <>
-              <button onClick={() => setEditing(false)}
-                className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted border border-border rounded-lg px-3 py-1.5 font-medium">
-                <X size={13} /> Cancel
-              </button>
-              <button onClick={handleSaveEdit}
-                className="flex items-center gap-1.5 text-xs text-white bg-primary rounded-lg px-3 py-1.5 font-medium">
-                <Check size={13} /> Save
-              </button>
+              <PreviewAction onClick={() => setEditing(false)} icon={X}>
+                Cancel
+              </PreviewAction>
+              <PreviewAction onClick={handleSaveEdit} icon={Check} variant="dark">
+                Save
+              </PreviewAction>
             </>
           )}
         </div>
@@ -54,18 +93,18 @@ export default function CvPreview({ cvText, onTextChange }) {
       {editing ? (
         <textarea
           value={editText}
-          onChange={e => setEditText(e.target.value)}
-          className="w-full h-[60vh] font-mono text-xs p-4 rounded-2xl border border-border bg-white resize-none focus:outline-none focus:ring-2 focus:ring-ring"
+          onChange={(e) => setEditText(e.target.value)}
+          className="h-[58vh] w-full resize-none rounded-[1.5rem] border border-black/10 bg-white/90 p-4 font-mono text-xs leading-relaxed text-charcoal outline-none transition focus:border-primary/50 focus:ring-4 focus:ring-primary/10"
         />
       ) : (
-        <div className="rounded-2xl border border-border bg-white p-5 overflow-auto max-h-[60vh]">
-          <pre className="text-xs font-mono whitespace-pre-wrap text-foreground leading-relaxed">{cvText}</pre>
+        <div className="max-h-[58vh] overflow-auto rounded-[1.5rem] border border-black/8 bg-[#fffdf8] p-4 shadow-inner">
+          <pre className="whitespace-pre-wrap font-mono text-xs leading-relaxed text-charcoal/88">{cvText}</pre>
         </div>
       )}
 
-      <p className="text-xs text-muted-foreground text-center">
-        PDF/DOCX export available in Pro · Copy and paste into a document now
-      </p>
+      <GuidanceNote variant="lock">
+        Copy and edit are available now. PDF export unlocks later through the planned credit/pro system.
+      </GuidanceNote>
     </div>
   );
 }
