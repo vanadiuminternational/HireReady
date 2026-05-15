@@ -10,6 +10,7 @@ import { planRoute } from '../orchestrator/router.js';
 import { validateRecruiterXrayResult } from '../orchestrator/validator.js';
 import { mockProvider } from '../providers/mockProvider.js';
 import { recruiterXrayRequestSchema } from '../schemas/recruiterXray.js';
+import { aiStorage } from '../storage/memoryStorage.js';
 
 export const aiRouter = Router();
 
@@ -17,11 +18,12 @@ aiRouter.get('/actions', (_req: Request, res: Response) => {
   res.json({ actions: listAiActions() });
 });
 
-aiRouter.get('/debug/stats', (_req: Request, res: Response) => {
+aiRouter.get('/debug/stats', async (_req: Request, res: Response) => {
   res.json({
     cache: getCacheStats(),
     requests: getRequestLogStats(),
     recentRequests: getRecentRequestLogs(10),
+    storage: await aiStorage.getStats(),
     scaffold: {
       liveAi: false,
       note: 'In-memory scaffold stats only. Not for production persistence.',
@@ -59,8 +61,13 @@ aiRouter.post('/recruiter-xray', async (req: Request, res: Response) => {
 
   const inputHash = buildActionInputHash(action.actionId, cvText, jobDescription);
   const requestLog = createRequestLog(action.actionId, inputHash);
+  await aiStorage.createRequest({ ...requestLog });
   const routePlan = planRoute(action);
   updateRequestLog(requestLog.requestId, {
+    routeProvider: routePlan.provider,
+    modelTier: routePlan.modelTier,
+  });
+  await aiStorage.updateRequest(requestLog.requestId, {
     routeProvider: routePlan.provider,
     modelTier: routePlan.modelTier,
   });
@@ -68,6 +75,13 @@ aiRouter.post('/recruiter-xray', async (req: Request, res: Response) => {
   const cached = action.cacheable ? getCachedResult(inputHash) : null;
   if (cached) {
     updateRequestLog(requestLog.requestId, {
+      status: 'cache_hit',
+      cacheHit: true,
+      creditsReserved: 0,
+      creditsCharged: 0,
+      latencyMs: Date.now() - started,
+    });
+    await aiStorage.updateRequest(requestLog.requestId, {
       status: 'cache_hit',
       cacheHit: true,
       creditsReserved: 0,
@@ -122,6 +136,19 @@ aiRouter.post('/recruiter-xray', async (req: Request, res: Response) => {
     cacheHit: false,
     creditsReserved: reservation.creditsReserved,
   });
+  await aiStorage.updateRequest(requestLog.requestId, {
+    status: 'provider_called',
+    cacheHit: false,
+    creditsReserved: reservation.creditsReserved,
+  });
+  await aiStorage.recordCreditEvent({
+    eventId: `${reservation.reservationId}_reserved`,
+    requestId: requestLog.requestId,
+    actionId: action.actionId,
+    type: 'reserved',
+    credits: reservation.creditsReserved,
+    createdAt: new Date().toISOString(),
+  });
 
   try {
     const providerResponse = await mockProvider.runRecruiterXray({
@@ -141,6 +168,20 @@ aiRouter.post('/recruiter-xray', async (req: Request, res: Response) => {
         errorType: 'validation_failed',
         latencyMs: Date.now() - started,
       });
+      await aiStorage.updateRequest(requestLog.requestId, {
+        status: 'refunded',
+        creditsCharged: 0,
+        errorType: 'validation_failed',
+        latencyMs: Date.now() - started,
+      });
+      await aiStorage.recordCreditEvent({
+        eventId: `${reservation.reservationId}_refunded`,
+        requestId: requestLog.requestId,
+        actionId: action.actionId,
+        type: 'refunded',
+        credits: refunded.creditsReserved,
+        createdAt: new Date().toISOString(),
+      });
       res.status(502).json({
         error: 'AI response failed validation.',
         validationError: validation.reason,
@@ -150,14 +191,40 @@ aiRouter.post('/recruiter-xray', async (req: Request, res: Response) => {
     }
 
     updateRequestLog(requestLog.requestId, { status: 'validated' });
+    await aiStorage.updateRequest(requestLog.requestId, { status: 'validated' });
     const cachedResult = action.cacheable
       ? setCachedResult({ inputHash, actionId: action.actionId, result: validation.result })
       : null;
+    if (cachedResult) {
+      await aiStorage.setCacheEntry({ ...cachedResult });
+    }
+    await aiStorage.saveResult({
+      resultId: `result_${requestLog.requestId}`,
+      requestId: requestLog.requestId,
+      actionId: action.actionId,
+      inputHash,
+      resultJson: validation.result,
+      resultSummary: validation.result.verdict,
+      createdAt: new Date().toISOString(),
+    });
     const charged = chargeCredits(reservation);
     updateRequestLog(requestLog.requestId, {
       status: 'charged',
       creditsCharged: charged.creditsReserved,
       latencyMs: Date.now() - started,
+    });
+    await aiStorage.updateRequest(requestLog.requestId, {
+      status: 'charged',
+      creditsCharged: charged.creditsReserved,
+      latencyMs: Date.now() - started,
+    });
+    await aiStorage.recordCreditEvent({
+      eventId: `${reservation.reservationId}_charged`,
+      requestId: requestLog.requestId,
+      actionId: action.actionId,
+      type: 'charged',
+      credits: charged.creditsReserved,
+      createdAt: new Date().toISOString(),
     });
 
     res.json({
@@ -193,6 +260,20 @@ aiRouter.post('/recruiter-xray', async (req: Request, res: Response) => {
       creditsCharged: 0,
       errorType: error instanceof Error ? error.name : 'unknown_error',
       latencyMs: Date.now() - started,
+    });
+    await aiStorage.updateRequest(requestLog.requestId, {
+      status: 'failed',
+      creditsCharged: 0,
+      errorType: error instanceof Error ? error.name : 'unknown_error',
+      latencyMs: Date.now() - started,
+    });
+    await aiStorage.recordCreditEvent({
+      eventId: `${reservation.reservationId}_refunded`,
+      requestId: requestLog.requestId,
+      actionId: action.actionId,
+      type: 'refunded',
+      credits: refunded.creditsReserved,
+      createdAt: new Date().toISOString(),
     });
     res.status(500).json({
       error: error instanceof Error ? error.message : 'Recruiter X-Ray failed.',
