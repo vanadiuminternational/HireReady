@@ -1,7 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bookmark, Plus, Trash2, Copy, Edit, Download, FileText, Pencil, Check, X } from 'lucide-react';
-import BottomNav from '@/components/BottomNav';
+import { Bookmark, Check, Copy, Download, Edit, FileText, Pencil, Plus, Trash2, X } from 'lucide-react';
+import AppShell from '@/components/app/AppShell';
+import CreditPill from '@/components/app/CreditPill';
+import GuidanceNote from '@/components/app/GuidanceNote';
+import PremiumCard from '@/components/app/PremiumCard';
+import PrimaryAction from '@/components/app/PrimaryAction';
+import SecondaryAction from '@/components/app/SecondaryAction';
+import SectionHeader from '@/components/app/SectionHeader';
 import { getAllCVs, deleteCV, duplicateCV, renameCV } from '@/services/storageService';
 import { copyToClipboard } from '@/services/exportService';
 import { toast } from 'sonner';
@@ -14,140 +20,146 @@ export default function SavedCVs() {
 
   useEffect(() => { setCvs(getAllCVs()); }, []);
 
+  const refresh = () => setCvs(getAllCVs());
+
   const handleDelete = (id) => {
     deleteCV(id);
-    setCvs(getAllCVs());
+    refresh();
     toast.success('CV deleted.');
   };
 
   const handleDuplicate = (id) => {
     duplicateCV(id);
-    setCvs(getAllCVs());
+    refresh();
     toast.success('CV duplicated.');
   };
 
   const handleEdit = (cv) => navigate(`/build?edit=${cv.id}`);
 
-  const startRename = (cv) => { setRenamingId(cv.id); setRenameValue(cv.name || ''); };
+  const startRename = (cv) => {
+    setRenamingId(cv.id);
+    setRenameValue(cv.name || '');
+  };
+
   const confirmRename = (id) => {
     renameCV(id, renameValue.trim() || 'Untitled CV');
-    setCvs(getAllCVs());
+    refresh();
     setRenamingId(null);
     toast.success('Renamed.');
   };
 
   const handleCopyCV = async (cv) => {
     const copiedToClipboard = await copyToClipboard(cv.cvText || '');
-    if (copiedToClipboard) toast.success('CV text copied to clipboard!');
+    if (copiedToClipboard) toast.success('CV text copied to clipboard.');
     else toast.error('Copy failed. Select the text manually.');
   };
 
-  const getScoreColor = (score) => {
-    if (!score) return 'text-muted-foreground';
-    if (score >= 80) return 'text-emerald-600';
-    if (score >= 60) return 'text-blue-500';
-    return 'text-yellow-500';
+  const getScoreTone = (score) => {
+    if (!score) return 'Ready';
+    if (score >= 80) return 'Strong';
+    if (score >= 60) return 'Good';
+    return 'Needs work';
   };
 
   const formatDate = (iso) => {
-    if (!iso) return '';
+    if (!iso) return 'Saved locally';
     return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
   return (
-    <div className="min-h-screen bg-background pb-24">
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border px-5 py-4">
-        <div className="max-w-lg mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Bookmark size={20} className="text-primary" />
+    <AppShell contentClassName="space-y-4 pb-5">
+      <PremiumCard tone="dark" className="overflow-hidden p-0">
+        <div className="bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.22),transparent_13rem)] p-5">
+          <div className="mb-4 flex items-start justify-between gap-4">
             <div>
-              <h1 className="text-base font-bold text-foreground">Saved CVs</h1>
-              <p className="text-xs text-muted-foreground">{cvs.length} CV{cvs.length !== 1 ? 's' : ''} saved locally</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/42">Saved locally</p>
+              <h1 className="mt-2 text-[1.65rem] font-extrabold leading-tight text-white">Your CV workspace.</h1>
+              <p className="mt-2 text-sm font-medium leading-6 text-white/58">
+                Keep versions, duplicate drafts, copy text, and return to editing when needed.
+              </p>
+            </div>
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-white">
+              <Bookmark size={22} />
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-2xl bg-white/10 px-3 py-2.5">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/38">Saved</p>
+              <p className="mt-1 text-xs font-bold text-white/82">{cvs.length} CV{cvs.length === 1 ? '' : 's'}</p>
+            </div>
+            <div className="rounded-2xl bg-white/10 px-3 py-2.5">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/38">Storage</p>
+              <p className="mt-1 text-xs font-bold text-white/82">On device</p>
             </div>
           </div>
-          <button onClick={() => navigate('/build')}
-            className="flex items-center gap-1.5 bg-primary text-primary-foreground text-xs font-semibold rounded-xl px-3 py-2">
-            <Plus size={14} /> New CV
-          </button>
         </div>
-      </div>
+      </PremiumCard>
 
-      <div className="px-5 pt-5 max-w-lg mx-auto space-y-4">
-        {cvs.length === 0 ? (
-          <div className="text-center py-16">
-            <FileText size={48} className="text-muted-foreground/30 mx-auto mb-4" />
-            <p className="text-sm font-medium text-muted-foreground">No saved CVs yet</p>
-            <p className="text-xs text-muted-foreground mt-1 mb-6">Build your first CV to see it here.</p>
-            <button onClick={() => navigate('/build')}
-              className="bg-primary text-primary-foreground text-sm font-semibold rounded-xl px-6 py-3">
-              Build My First CV
-            </button>
+      <PrimaryAction onClick={() => navigate('/build')} icon={Plus}>Build a new CV</PrimaryAction>
+
+      {cvs.length === 0 ? (
+        <PremiumCard className="space-y-4 p-5 text-center">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-3xl bg-primary/10 text-primary">
+            <FileText size={24} />
           </div>
-        ) : (
-          cvs.map(cv => (
-            <div key={cv.id} className="bg-white rounded-2xl border border-border p-4 shadow-sm">
-              {/* Name row */}
-              <div className="flex justify-between items-start mb-2">
-                <div className="flex-1 min-w-0">
+          <SectionHeader
+            eyebrow="Empty workspace"
+            title="No saved CVs yet"
+            description="Generate and save your first CV. It will appear here for editing, copying, and versioning."
+            className="mb-0 items-center text-center"
+          />
+          <PrimaryAction onClick={() => navigate('/smart-start')}>Start Smart CV</PrimaryAction>
+          <SecondaryAction onClick={() => navigate('/build')} className="w-full justify-center">Build manually</SecondaryAction>
+        </PremiumCard>
+      ) : (
+        <div className="space-y-3">
+          {cvs.map((cv) => (
+            <PremiumCard key={cv.id} className="space-y-4 p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
                   {renamingId === cv.id ? (
                     <div className="flex items-center gap-2">
                       <input
                         value={renameValue}
-                        onChange={e => setRenameValue(e.target.value)}
-                        onKeyDown={e => { if (e.key === 'Enter') confirmRename(cv.id); if (e.key === 'Escape') setRenamingId(null); }}
-                        className="flex-1 text-sm font-semibold border-b border-primary bg-transparent outline-none min-w-0"
+                        onChange={(event) => setRenameValue(event.target.value)}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter') confirmRename(cv.id);
+                          if (event.key === 'Escape') setRenamingId(null);
+                        }}
+                        className="min-h-10 flex-1 rounded-2xl border border-primary/30 bg-white px-3 text-sm font-extrabold text-charcoal outline-none"
                         autoFocus
                       />
-                      <button onClick={() => confirmRename(cv.id)} className="text-primary"><Check size={14} /></button>
-                      <button onClick={() => setRenamingId(null)} className="text-muted-foreground"><X size={14} /></button>
+                      <button onClick={() => confirmRename(cv.id)} className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary text-white"><Check size={14} /></button>
+                      <button onClick={() => setRenamingId(null)} className="flex h-9 w-9 items-center justify-center rounded-2xl bg-black/5 text-charcoal/60"><X size={14} /></button>
                     </div>
                   ) : (
                     <div className="flex items-center gap-2">
-                      <p className="font-semibold text-foreground text-sm truncate">{cv.name || 'Untitled CV'}</p>
-                      <button onClick={() => startRename(cv)} className="text-muted-foreground flex-shrink-0"><Pencil size={12} /></button>
+                      <p className="truncate text-sm font-extrabold text-charcoal">{cv.name || 'Untitled CV'}</p>
+                      <button onClick={() => startRename(cv)} className="shrink-0 text-charcoal/42"><Pencil size={13} /></button>
                     </div>
                   )}
-                  <p className="text-xs text-muted-foreground truncate mt-0.5">{cv.userInput?.targetJobTitle || 'No target role'}</p>
+                  <p className="mt-1 truncate text-xs font-medium text-charcoal/55">{cv.userInput?.targetJobTitle || 'No target role'} · {formatDate(cv.createdAt)}</p>
+                  {cv.template && <p className="mt-1 text-xs font-bold text-primary">{cv.template.name}</p>}
                 </div>
-                {cv.atsScore != null && (
-                  <span className={`text-sm font-bold ml-3 ${getScoreColor(cv.atsScore)}`}>{cv.atsScore}/100</span>
-                )}
+                <CreditPill>{cv.atsScore != null ? `${cv.atsScore}%` : getScoreTone(cv.atsScore)}</CreditPill>
               </div>
 
-              <div className="flex gap-3 text-xs text-muted-foreground mb-4">
-                <span>{formatDate(cv.createdAt)}</span>
-                {cv.template && <span>• {cv.template.name}</span>}
+              <div className="grid grid-cols-2 gap-2">
+                <SecondaryAction onClick={() => handleEdit(cv)} icon={Edit} className="justify-center">Edit</SecondaryAction>
+                <SecondaryAction onClick={() => handleCopyCV(cv)} icon={Copy} className="justify-center">Copy</SecondaryAction>
+                <SecondaryAction onClick={() => handleDuplicate(cv.id)} icon={Copy} className="justify-center">Duplicate</SecondaryAction>
+                <SecondaryAction onClick={() => toast.info('PDF export will use the future credit/pro system.')} icon={Download} className="justify-center">Export</SecondaryAction>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 mb-2">
-                <button onClick={() => handleEdit(cv)}
-                  className="flex items-center justify-center gap-1.5 bg-primary/10 text-primary text-xs font-medium rounded-xl py-2">
-                  <Edit size={13} /> Edit
-                </button>
-                <button onClick={() => handleCopyCV(cv)}
-                  className="flex items-center justify-center gap-1.5 bg-blue-50 text-blue-600 text-xs font-medium rounded-xl py-2">
-                  <Copy size={13} /> Copy CV
-                </button>
-                <button onClick={() => handleDuplicate(cv.id)}
-                  className="flex items-center justify-center gap-1.5 bg-muted text-muted-foreground text-xs font-medium rounded-xl py-2">
-                  <Copy size={13} /> Duplicate
-                </button>
-                <button onClick={() => toast.info('PDF export available in Pro')}
-                  className="flex items-center justify-center gap-1.5 bg-muted text-muted-foreground text-xs font-medium rounded-xl py-2">
-                  <Download size={13} /> Export
-                </button>
-              </div>
-
-              <button onClick={() => handleDelete(cv.id)}
-                className="w-full flex items-center justify-center gap-1.5 text-red-400 text-xs font-medium py-2 rounded-xl hover:bg-red-50 transition-colors">
-                <Trash2 size={13} /> Delete
+              <button onClick={() => handleDelete(cv.id)} className="flex w-full items-center justify-center gap-2 rounded-2xl border border-red-100 bg-red-50 py-3 text-xs font-extrabold text-red-500 transition active:scale-[0.99]">
+                <Trash2 size={14} /> Delete CV
               </button>
-            </div>
-          ))
-        )}
-      </div>
+            </PremiumCard>
+          ))}
+        </div>
+      )}
 
-      <BottomNav />
-    </div>
+      <GuidanceNote variant="lock">Saved CVs are stored locally on this device in the current version.</GuidanceNote>
+    </AppShell>
   );
 }
