@@ -5,7 +5,6 @@ import AppShell from '@/components/app/AppShell';
 import GuidanceNote from '@/components/app/GuidanceNote';
 import PremiumCard from '@/components/app/PremiumCard';
 import PrimaryAction from '@/components/app/PrimaryAction';
-import SecondaryAction from '@/components/app/SecondaryAction';
 import SectionHeader from '@/components/app/SectionHeader';
 import { TEMPLATE_RULES } from '@/data/templateRules';
 import { copyToClipboard } from '@/services/exportService';
