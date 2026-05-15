@@ -9,4 +9,6 @@ export const config = {
   aiLiveEnabled: process.env.AI_LIVE_ENABLED === 'true',
   aiProvider: process.env.AI_PROVIDER ?? 'mock',
   platformMonthlyCostCapCents: Number(process.env.PLATFORM_MONTHLY_COST_CAP_CENTS ?? 2500),
+  storageDriver: process.env.STORAGE_DRIVER ?? 'memory',
+  sqlitePath: process.env.SQLITE_PATH ?? './data/hireready.sqlite',
 };
