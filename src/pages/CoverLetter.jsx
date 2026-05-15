@@ -23,7 +23,6 @@ import PremiumCard from '@/components/app/PremiumCard';
 import PrimaryAction from '@/components/app/PrimaryAction';
 import SecondaryAction from '@/components/app/SecondaryAction';
 import SectionHeader from '@/components/app/SectionHeader';
-import SmartBadge from '@/components/app/SmartBadge';
 import CoverLetterScore from '@/components/CoverLetterScore';
 import { generateCoverLetter, scoreCoverLetter, generateCoverLetterTips } from '@/services/coverLetterEngineService';
 import { analyseJobDescription } from '@/services/cvEngineService';
