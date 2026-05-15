@@ -3,16 +3,24 @@ import { jsPDF } from 'jspdf';
 export const copyToClipboard = async (text) => {
   if (!text) return false;
   try {
-    await navigator.clipboard.writeText(text);
+    await navigator.clipboard?.writeText(text);
     return true;
   } catch {
-    const el = document.createElement('textarea');
-    el.value = text;
-    document.body.appendChild(el);
-    el.select();
-    document.execCommand('copy');
-    document.body.removeChild(el);
-    return true;
+    let el;
+    try {
+      el = document.createElement('textarea');
+      el.value = text;
+      el.setAttribute('readonly', '');
+      el.style.position = 'fixed';
+      el.style.top = '-9999px';
+      document.body.appendChild(el);
+      el.select();
+      return document.execCommand('copy');
+    } catch {
+      return false;
+    } finally {
+      if (el) document.body.removeChild(el);
+    }
   }
 };
 

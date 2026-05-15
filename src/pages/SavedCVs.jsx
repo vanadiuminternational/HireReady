@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Bookmark, Plus, Trash2, Copy, Edit, Download, FileText, Pencil, Check, X } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 import { getAllCVs, deleteCV, duplicateCV, renameCV } from '@/services/storageService';
+import { copyToClipboard } from '@/services/exportService';
 import { toast } from 'sonner';
 
 export default function SavedCVs() {
@@ -35,9 +36,10 @@ export default function SavedCVs() {
     toast.success('Renamed.');
   };
 
-  const handleCopyCV = (cv) => {
-    navigator.clipboard.writeText(cv.cvText || '');
-    toast.success('CV text copied to clipboard!');
+  const handleCopyCV = async (cv) => {
+    const copiedToClipboard = await copyToClipboard(cv.cvText || '');
+    if (copiedToClipboard) toast.success('CV text copied to clipboard!');
+    else toast.error('Copy failed. Select the text manually.');
   };
 
   const getScoreColor = (score) => {
