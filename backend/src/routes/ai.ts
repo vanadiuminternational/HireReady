@@ -1,8 +1,11 @@
 import { type NextFunction, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import { getAction, listAiActions } from '../orchestrator/actions.js';
+import { getCachedResult, getCacheStats, setCachedResult } from '../orchestrator/cache.js';
 import { checkCostGuard } from '../orchestrator/costGuard.js';
 import { chargeCredits, refundCredits, reserveCredits } from '../orchestrator/credits.js';
+import { buildActionInputHash } from '../orchestrator/hash.js';
+import { createRequestLog, getRecentRequestLogs, getRequestLogStats, updateRequestLog } from '../orchestrator/requestLog.js';
 import { planRoute } from '../orchestrator/router.js';
 import { validateRecruiterXrayResult } from '../orchestrator/validator.js';
 import { mockProvider } from '../providers/mockProvider.js';
@@ -14,7 +17,20 @@ aiRouter.get('/actions', (_req: Request, res: Response) => {
   res.json({ actions: listAiActions() });
 });
 
+aiRouter.get('/debug/stats', (_req: Request, res: Response) => {
+  res.json({
+    cache: getCacheStats(),
+    requests: getRequestLogStats(),
+    recentRequests: getRecentRequestLogs(10),
+    scaffold: {
+      liveAi: false,
+      note: 'In-memory scaffold stats only. Not for production persistence.',
+    },
+  });
+});
+
 aiRouter.post('/recruiter-xray', async (req: Request, res: Response) => {
+  const started = Date.now();
   const action = getAction('recruiter_xray');
   if (!action) {
     res.status(500).json({ error: 'Recruiter X-Ray action is not registered.' });
@@ -41,8 +57,71 @@ aiRouter.post('/recruiter-xray', async (req: Request, res: Response) => {
     return;
   }
 
+  const inputHash = buildActionInputHash(action.actionId, cvText, jobDescription);
+  const requestLog = createRequestLog(action.actionId, inputHash);
   const routePlan = planRoute(action);
+  updateRequestLog(requestLog.requestId, {
+    routeProvider: routePlan.provider,
+    modelTier: routePlan.modelTier,
+  });
+
+  const cached = action.cacheable ? getCachedResult(inputHash) : null;
+  if (cached) {
+    updateRequestLog(requestLog.requestId, {
+      status: 'cache_hit',
+      cacheHit: true,
+      creditsReserved: 0,
+      creditsCharged: 0,
+      latencyMs: Date.now() - started,
+    });
+
+    res.json({
+      action: {
+        actionId: action.actionId,
+        label: action.label,
+        credits: 0,
+        originalCredits: action.creditCost,
+      },
+      route: routePlan,
+      credits: {
+        reservationId: `cache_${requestLog.requestId}`,
+        creditsReserved: 0,
+        status: 'charged',
+        note: 'Cache hit. No simulated credits charged in scaffold.',
+      },
+      result: cached.result,
+      provider: {
+        id: 'cache',
+        model: 'cached-result',
+        usage: {
+          inputTokens: 0,
+          outputTokens: 0,
+          cachedInputTokens: 0,
+          estimatedCostCents: 0,
+        },
+        latencyMs: Date.now() - started,
+      },
+      cache: {
+        hit: true,
+        inputHash,
+        createdAt: cached.createdAt,
+        hits: cached.hits,
+      },
+      request: getRecentRequestLogs(1)[0],
+      scaffold: {
+        liveAi: false,
+        note: 'Returned from in-memory scaffold cache. No live AI provider was called.',
+      },
+    });
+    return;
+  }
+
   const reservation = reserveCredits(action.actionId, action.creditCost);
+  updateRequestLog(requestLog.requestId, {
+    status: 'provider_called',
+    cacheHit: false,
+    creditsReserved: reservation.creditsReserved,
+  });
 
   try {
     const providerResponse = await mockProvider.runRecruiterXray({
@@ -56,6 +135,12 @@ aiRouter.post('/recruiter-xray', async (req: Request, res: Response) => {
     const validation = validateRecruiterXrayResult(providerResponse.result);
     if (!validation.ok || !validation.result) {
       const refunded = refundCredits(reservation);
+      updateRequestLog(requestLog.requestId, {
+        status: 'refunded',
+        creditsCharged: 0,
+        errorType: 'validation_failed',
+        latencyMs: Date.now() - started,
+      });
       res.status(502).json({
         error: 'AI response failed validation.',
         validationError: validation.reason,
@@ -64,7 +149,17 @@ aiRouter.post('/recruiter-xray', async (req: Request, res: Response) => {
       return;
     }
 
+    updateRequestLog(requestLog.requestId, { status: 'validated' });
+    const cachedResult = action.cacheable
+      ? setCachedResult({ inputHash, actionId: action.actionId, result: validation.result })
+      : null;
     const charged = chargeCredits(reservation);
+    updateRequestLog(requestLog.requestId, {
+      status: 'charged',
+      creditsCharged: charged.creditsReserved,
+      latencyMs: Date.now() - started,
+    });
+
     res.json({
       action: {
         actionId: action.actionId,
@@ -80,6 +175,12 @@ aiRouter.post('/recruiter-xray', async (req: Request, res: Response) => {
         usage: providerResponse.usage,
         latencyMs: providerResponse.latencyMs,
       },
+      cache: {
+        hit: false,
+        inputHash,
+        stored: Boolean(cachedResult),
+      },
+      request: getRecentRequestLogs(1)[0],
       scaffold: {
         liveAi: false,
         note: 'Mock provider only. No live AI provider was called.',
@@ -87,6 +188,12 @@ aiRouter.post('/recruiter-xray', async (req: Request, res: Response) => {
     });
   } catch (error) {
     const refunded = refundCredits(reservation);
+    updateRequestLog(requestLog.requestId, {
+      status: 'failed',
+      creditsCharged: 0,
+      errorType: error instanceof Error ? error.name : 'unknown_error',
+      latencyMs: Date.now() - started,
+    });
     res.status(500).json({
       error: error instanceof Error ? error.message : 'Recruiter X-Ray failed.',
       credits: refunded,
