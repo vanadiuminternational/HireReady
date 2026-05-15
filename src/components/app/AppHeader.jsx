@@ -11,7 +11,7 @@ export default function AppHeader({
   className = '',
 }) {
   return (
-    <header className={cn('space-y-4 pb-4 pt-3', className)}>
+    <header className={cn('space-y-3 pb-3 pt-2', className)}>
       <div className="flex min-h-10 items-center justify-between gap-3">
         {backTo ? (
           <Link
@@ -33,7 +33,7 @@ export default function AppHeader({
             {eyebrow}
           </p>
         )}
-        <h1 className="text-[2rem] font-extrabold leading-[1.05] text-charcoal">
+        <h1 className="text-[1.68rem] font-extrabold leading-[1.08] text-charcoal">
           {title}
         </h1>
         {description && (

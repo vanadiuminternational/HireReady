@@ -1,26 +1,26 @@
-import { Link } from 'react-router-dom';
 import {
-  AlertTriangle,
   ArrowRight,
   CheckCircle2,
-  Clock3,
-  FileText,
   Layers3,
-  ListChecks,
+  Lightbulb,
   RotateCcw,
+  ShieldCheck,
   Sparkles,
   Wand2,
 } from 'lucide-react';
 import AppHeader from '@/components/app/AppHeader';
 import AppShell from '@/components/app/AppShell';
 import CreditPill from '@/components/app/CreditPill';
+import GuidanceNote from '@/components/app/GuidanceNote';
 import PremiumCard from '@/components/app/PremiumCard';
 import PrimaryAction from '@/components/app/PrimaryAction';
+import RecommendationCard from '@/components/app/RecommendationCard';
 import SecondaryAction from '@/components/app/SecondaryAction';
-import SmartBadge from '@/components/app/SmartBadge';
-import { AI_TIERS, getActionCostLabel } from '@/engine/credits';
+import SectionHeader from '@/components/app/SectionHeader';
+import { getActionCostLabel } from '@/engine/credits';
 import { planAiRequest } from '@/engine/ai-router';
 import { buildCvRecommendation } from '@/engine/recommendations';
+import { MONETIZATION_CONFIG } from '@/config/monetizationConfig';
 import { getStoredSmartStart } from '@/lib/smartStartStorage';
 
 const sectionLabels = {
@@ -36,14 +36,14 @@ const sectionLabels = {
   portfolio: 'Portfolio',
   selectedProjects: 'Selected projects',
   awards: 'Awards',
-  licensesCertifications: 'Licences and certifications',
+  licensesCertifications: 'Licences',
   clinicalSkills: 'Clinical skills',
   training: 'Training',
   coreSkills: 'Core skills',
-  certificationsTickets: 'Certifications and tickets',
+  certificationsTickets: 'Tickets',
   availability: 'Availability',
   executiveProfile: 'Executive profile',
-  leadershipHighlights: 'Leadership highlights',
+  leadershipHighlights: 'Leadership',
   boardAdvisory: 'Board advisory',
   publications: 'Publications',
   researchProfile: 'Research profile',
@@ -54,7 +54,7 @@ const sectionLabels = {
   conferences: 'Conferences',
   service: 'Service',
   transferableSkills: 'Transferable skills',
-  selectedAchievements: 'Selected achievements',
+  selectedAchievements: 'Achievements',
 };
 
 function humanize(value) {
@@ -65,15 +65,11 @@ function humanize(value) {
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
-function InfoList({ items, icon: Icon = CheckCircle2, muted = false }) {
+function EvidenceRow({ children, icon: Icon = CheckCircle2 }) {
   return (
-    <div className="space-y-2.5">
-      {items.map((item) => (
-        <div key={item} className="flex gap-2.5">
-          <Icon size={16} className={muted ? 'mt-0.5 shrink-0 text-charcoal/50' : 'mt-0.5 shrink-0 text-primary'} />
-          <p className="text-sm leading-5 text-charcoal/70">{item}</p>
-        </div>
-      ))}
+    <div className="flex gap-2.5 rounded-2xl bg-white/68 px-3.5 py-3">
+      <Icon size={16} className="mt-0.5 shrink-0 text-primary" />
+      <p className="text-sm font-medium leading-5 text-charcoal/72">{children}</p>
     </div>
   );
 }
@@ -81,169 +77,131 @@ function InfoList({ items, icon: Icon = CheckCircle2, muted = false }) {
 export default function Recommendation() {
   const smartStart = getStoredSmartStart();
   const recommendation = buildCvRecommendation(smartStart);
-  const createdAt = smartStart.recommendationTimestamp
-    ? new Date(smartStart.recommendationTimestamp).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
-    : null;
-
   const skeletonPlan = planAiRequest('buildSkeleton');
-  const tailorPlan = planAiRequest('tailorCvToJob');
-  const summaryPlan = planAiRequest('rewriteSummary');
-  const aiOpportunities = recommendation.aiOpportunities.slice(0, 4).map(humanize);
   const avoidItems = [
     ...recommendation.avoid.map((item) => `Avoid ${item}.`),
-    ...recommendation.warnings.slice(0, 3),
-  ];
+    ...recommendation.warnings,
+  ].slice(0, 3);
+  const requiredSet = new Set(recommendation.requiredSections);
+  const sectionOrder = recommendation.sectionOrder.slice(0, 10);
+  const aiOpportunities = recommendation.aiOpportunities.slice(0, 3).map(humanize);
 
   return (
-    <AppShell withBottomNav={false} contentClassName="space-y-5 pb-8">
+    <AppShell withBottomNav={false} contentClassName="space-y-4 pb-5">
       <AppHeader
         eyebrow="Recommendation"
-        title="Your best starting CV path is ready."
-        description="This is a local rules recommendation. AI actions are planned for later credit-backed backend work."
+        title="This is the CV path to start with."
+        description="A focused local recommendation based on your answers."
         backTo="/smart-start"
-        action={<CreditPill>{AI_TIERS.rule.label}</CreditPill>}
+        action={<CreditPill>{MONETIZATION_CONFIG.uiCopy.ruleOnly}</CreditPill>}
       />
 
-      <PremiumCard tone="dark" className="overflow-hidden p-0">
-        <div className="bg-[radial-gradient(circle_at_top_right,rgba(20,184,166,0.35),transparent_15rem)] p-5">
-          <div className="mb-5 flex items-start justify-between gap-3">
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/50">Recommended CV mode</p>
-              <h2 className="mt-2 text-2xl font-bold leading-tight text-white">
-                {recommendation.recommendedMode}
-              </h2>
-            </div>
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-white">
-              <FileText size={22} />
-            </div>
-          </div>
+      <RecommendationCard
+        mode={recommendation.recommendedMode}
+        targetRole={smartStart.targetRole}
+        region={recommendation.region.label}
+        stage={recommendation.stageLabel}
+        template={humanize(recommendation.templateRecommendation)}
+      />
 
-          <div className="grid grid-cols-2 gap-2">
-            <div className="rounded-2xl bg-white/10 p-3">
-              <p className="text-[11px] font-semibold text-white/60">Target</p>
-              <p className="mt-1 truncate text-sm font-bold text-white">{smartStart.targetRole || 'General role'}</p>
-            </div>
-            <div className="rounded-2xl bg-white/10 p-3">
-              <p className="text-[11px] font-semibold text-white/60">Stage</p>
-              <p className="mt-1 truncate text-sm font-bold text-white">{recommendation.stageLabel}</p>
-            </div>
-          </div>
-
-          {createdAt && (
-            <div className="mt-4 flex items-center gap-2 text-xs font-medium text-white/60">
-              <Clock3 size={14} />
-              Saved {createdAt}
-            </div>
-          )}
+      <PremiumCard className="space-y-3 p-4">
+        <SectionHeader
+          eyebrow="Why"
+          title="Why this fits"
+          description="The engine matched your market, CV type, and stage."
+          action={<Sparkles size={18} className="text-primary" />}
+          className="mb-0"
+        />
+        <div className="space-y-2.5">
+          {recommendation.explanation.slice(0, 3).map((item) => (
+            <EvidenceRow key={item}>{item}</EvidenceRow>
+          ))}
         </div>
       </PremiumCard>
 
-      <PremiumCard className="space-y-4">
-        <div className="flex items-center gap-3">
-          <SmartBadge icon={Sparkles}>Why this fits</SmartBadge>
+      <PremiumCard className="space-y-3 p-4">
+        <SectionHeader
+          eyebrow="Structure"
+          title="Recommended sections"
+          description="Dark chips are required for this CV path."
+          action={<Layers3 size={18} className="text-primary" />}
+          className="mb-0"
+        />
+
+        <div className="grid grid-cols-2 gap-2">
+          {sectionOrder.map((section, index) => {
+            const required = requiredSet.has(section);
+            return (
+              <div
+                key={section}
+                className={`flex min-h-12 items-center gap-2 rounded-2xl px-3 py-2.5 ${
+                  required ? 'bg-charcoal text-white' : 'bg-black/5 text-charcoal'
+                }`}
+              >
+                <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-extrabold ${
+                  required ? 'bg-white text-charcoal' : 'bg-white text-charcoal/55'
+                }`}>
+                  {index + 1}
+                </span>
+                <span className="min-w-0 truncate text-xs font-bold">{humanize(section)}</span>
+              </div>
+            );
+          })}
         </div>
-        <InfoList items={recommendation.explanation} />
       </PremiumCard>
 
-      <PremiumCard className="space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <ListChecks size={19} />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-charcoal">Recommended sections</h2>
-            <p className="text-xs leading-5 text-charcoal/60">Required sections are highlighted first.</p>
-          </div>
+      <PremiumCard tone="warm" className="space-y-3 p-4">
+        <SectionHeader
+          eyebrow="Watch outs"
+          title="Keep it safe for this market"
+          description="Helpful guardrails, not blockers."
+          action={<ShieldCheck size={18} className="text-primary" />}
+          className="mb-0"
+        />
+        <div className="space-y-2.5">
+          {(avoidItems.length ? avoidItems : ['Avoid generic claims that are not supported by evidence.']).map((item) => (
+            <GuidanceNote key={item} variant="warning">
+              {item}
+            </GuidanceNote>
+          ))}
         </div>
+      </PremiumCard>
 
+      <PremiumCard className="space-y-3 p-4">
+        <SectionHeader
+          eyebrow="Template"
+          title={humanize(recommendation.templateRecommendation)}
+          description="The best visual starting point for this path."
+          action={<Lightbulb size={18} className="text-primary" />}
+          className="mb-0"
+        />
+        <GuidanceNote variant="success">
+          Start with this structure, then tune details inside Build CV.
+        </GuidanceNote>
+      </PremiumCard>
+
+      <PremiumCard tone="accent" className="space-y-3 p-4">
+        <SectionHeader
+          eyebrow="Later"
+          title="AI opportunities"
+          description={MONETIZATION_CONFIG.uiCopy.backendRequired}
+          action={<Wand2 size={18} className="text-primary" />}
+          className="mb-0"
+        />
         <div className="flex flex-wrap gap-2">
-          {recommendation.requiredSections.map((section) => (
-            <span key={section} className="rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-white">
-              {humanize(section)}
+          <span className="rounded-full bg-white/78 px-3 py-1.5 text-xs font-bold text-charcoal">
+            {getActionCostLabel('buildSkeleton')}
+          </span>
+          {aiOpportunities.map((item) => (
+            <span key={item} className="rounded-full bg-white/78 px-3 py-1.5 text-xs font-bold text-charcoal/68">
+              {item}
             </span>
           ))}
         </div>
-
-        <div className="space-y-2.5">
-          {recommendation.sectionOrder.map((section, index) => (
-            <div key={section} className="flex items-center gap-3 rounded-2xl bg-black/5 px-3 py-3">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-xs font-bold text-charcoal/60">
-                {index + 1}
-              </span>
-              <span className="text-sm font-semibold text-charcoal">{humanize(section)}</span>
-            </div>
-          ))}
-        </div>
+        <GuidanceNote variant="lock">{skeletonPlan.message}</GuidanceNote>
       </PremiumCard>
 
-      <PremiumCard tone="warm" className="space-y-4">
-        <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-amber-100 text-amber-800">
-            <AlertTriangle size={18} />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-charcoal">Things to avoid</h2>
-            <p className="text-xs leading-5 text-charcoal/60">These rules come from the selected region and CV category.</p>
-          </div>
-        </div>
-        <InfoList items={avoidItems.length ? avoidItems : ['Avoid generic claims that are not supported by evidence.']} icon={AlertTriangle} muted />
-      </PremiumCard>
-
-      <PremiumCard className="space-y-4">
-        <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <Layers3 size={18} />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-charcoal">Best starting template</h2>
-            <p className="mt-1 text-sm font-bold text-primary">{humanize(recommendation.templateRecommendation)}</p>
-            <p className="mt-1 text-xs leading-5 text-charcoal/60">
-              Start here, then tune the content around your target role and evidence.
-            </p>
-          </div>
-        </div>
-      </PremiumCard>
-
-      <PremiumCard tone="accent" className="space-y-4">
-        <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/80 text-primary">
-            <Wand2 size={18} />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-charcoal">AI actions later</h2>
-            <p className="mt-1 text-xs leading-5 text-charcoal/60">
-              {skeletonPlan.message} Premium actions will wait for backend credit enforcement.
-            </p>
-          </div>
-        </div>
-
-        <div className="space-y-2.5">
-          <div className="rounded-2xl bg-white/75 p-3">
-            <p className="text-sm font-bold text-charcoal">{getActionCostLabel('buildSkeleton')}</p>
-            <p className="mt-1 text-xs leading-5 text-charcoal/60">{skeletonPlan.action.reason}</p>
-          </div>
-          <div className="rounded-2xl bg-white/75 p-3">
-            <p className="text-sm font-bold text-charcoal">{getActionCostLabel('rewriteSummary')}</p>
-            <p className="mt-1 text-xs leading-5 text-charcoal/60">{summaryPlan.message}</p>
-          </div>
-          <div className="rounded-2xl bg-white/75 p-3">
-            <p className="text-sm font-bold text-charcoal">{getActionCostLabel('tailorCvToJob')}</p>
-            <p className="mt-1 text-xs leading-5 text-charcoal/60">{tailorPlan.message}</p>
-          </div>
-        </div>
-
-        {aiOpportunities.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {aiOpportunities.map((item) => (
-              <span key={item} className="rounded-full bg-white/75 px-3 py-1.5 text-xs font-bold text-charcoal/70">
-                {item}
-              </span>
-            ))}
-          </div>
-        )}
-      </PremiumCard>
-
-      <div className="grid grid-cols-[auto,1fr] gap-3 pb-3">
+      <div className="sticky bottom-3 z-20 grid grid-cols-[auto,1fr] gap-3 rounded-[1.65rem] border border-black/6 bg-[#faf7f0]/88 p-2 shadow-[0_18px_44px_rgba(55,45,30,0.12)] backdrop-blur">
         <SecondaryAction to="/smart-start" icon={RotateCcw} className="px-4">
           Change
         </SecondaryAction>
@@ -251,10 +209,6 @@ export default function Recommendation() {
           Build this CV
         </PrimaryAction>
       </div>
-
-      <Link to="/" className="block pb-2 text-center text-xs font-bold text-charcoal/50">
-        Back to Home
-      </Link>
     </AppShell>
   );
 }

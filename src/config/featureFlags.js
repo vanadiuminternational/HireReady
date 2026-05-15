@@ -1,0 +1,15 @@
+export const FEATURE_FLAGS = {
+  smartStartEnabled: true,
+  recommendationEnabled: true,
+  coverLetterEnabled: true,
+  recruiterXRayEnabled: true,
+  interviewPrepEnabled: true,
+  templatesEnabled: true,
+  savedCvsEnabled: true,
+  aiPlaceholdersEnabled: true,
+  liveAiEnabled: false,
+  creditsEnabled: false,
+  paymentsEnabled: false,
+  cloudSyncEnabled: false,
+  analyticsEnabled: false,
+};
