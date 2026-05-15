@@ -1,123 +1,77 @@
 // aiClient.js
-// Lightweight client for the Recruiter X-Ray feature.
+// Frontend-safe AI client facade for HireReady.
 //
-// Privacy model: the user's API key is stored ONLY in their own browser
-// (localStorage). It is never sent anywhere except directly to the AI
-// provider from the user's own machine. Nothing touches a server you run.
+// No provider API key is stored in the browser.
+// No direct Anthropic/OpenAI/Gemini call is made from frontend code.
 //
-// Currently wired for Anthropic's Messages API. Swapping to OpenAI is a
-// small change isolated to callModel() below.
+// Live AI calls must go through a future VPS backend that holds provider keys,
+// enforces credits, applies caching, and routes to the selected provider/model.
 
-const STORAGE_KEY = 'xray_api_key';
-const MODEL = 'claude-sonnet-4-20250514';
+import { planAiRequest } from '@/engine/ai-router';
 
-export const apiKeyStore = {
-  get() {
-    try {
-      return localStorage.getItem(STORAGE_KEY) || '';
-    } catch {
-      return '';
-    }
-  },
-  set(key) {
-    try {
-      if (key) localStorage.setItem(STORAGE_KEY, key.trim());
-      else localStorage.removeItem(STORAGE_KEY);
-    } catch {
-      /* storage unavailable - ignore */
-    }
-  },
-  clear() {
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch {
-      /* ignore */
-    }
-  },
-};
-
-const SYSTEM_PROMPT = `You are a blunt but fair senior hiring manager reviewing a candidate's CV against a specific job description. You are not a cheerleader. You have read thousands of CVs and you can spot weak, vague, or inflated claims instantly.
-
-Respond ONLY with a valid JSON object, no markdown, no preamble, in exactly this shape:
-{
-  "verdict": "one short sentence: would you shortlist this person for this role, yes/no/maybe, and why",
-  "questions": ["three specific, probing questions a skeptical interviewer would ask THIS candidate about THIS role - reference real details from their CV"],
-  "weakest_line": "quote the single line or phrase from the CV that is most hurting them, and one sentence on why",
-  "rewritten_bullet": "take their weakest experience bullet and rewrite it as a strong, specific, results-driven bullet point - invent nothing, only sharpen what is there",
-  "quick_wins": ["two or three concrete, small changes they could make in ten minutes"]
-}
-
-Be specific to the actual content. Never give generic advice that could apply to any CV.`;
-
-function buildUserMessage(cv, jobDescription) {
-  return `JOB DESCRIPTION:
-${jobDescription.trim()}
-
-CANDIDATE'S CV:
-${cv.trim()}
-
-Review this candidate for this exact role. Respond with the JSON object only.`;
-}
-
-function extractJson(text) {
-  // Models sometimes wrap JSON in ```json fences or add stray text.
-  const cleaned = text.replace(/```json/gi, '').replace(/```/g, '').trim();
-  const start = cleaned.indexOf('{');
-  const end = cleaned.lastIndexOf('}');
-  if (start === -1 || end === -1) {
-    throw new Error('The AI did not return readable JSON. Try again.');
+export class BackendNotConfiguredError extends Error {
+  constructor(message = 'AI backend is not connected yet.') {
+    super(message);
+    this.name = 'BackendNotConfiguredError';
   }
-  return JSON.parse(cleaned.slice(start, end + 1));
 }
 
-export async function runRecruiterXRay({ cv, jobDescription, apiKey }) {
-  if (!apiKey) throw new Error('No API key set.');
+const API_BASE_URL = import.meta.env.VITE_HIREREADY_API_URL || '';
+
+async function postAiAction(actionId, payload) {
+  const plan = planAiRequest(actionId);
+
+  if (plan.status === 'rule-only') {
+    return { plan, data: null };
+  }
+
+  if (!API_BASE_URL) {
+    throw new BackendNotConfiguredError(
+      `${plan.action.label} is planned as a ${plan.credits}-credit AI action, but the HireReady VPS backend is not connected yet.`
+    );
+  }
+
+  const response = await fetch(`${API_BASE_URL.replace(/\/$/, '')}/api/ai/actions/${actionId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ payload, plan }),
+  });
+
+  if (!response.ok) {
+    let message = 'The AI service returned an error.';
+    try {
+      const body = await response.json();
+      if (body?.message) message = body.message;
+    } catch {
+      // keep generic message
+    }
+    throw new Error(message);
+  }
+
+  return response.json();
+}
+
+export async function runRecruiterXRay({ cv, jobDescription }) {
   if (!cv?.trim()) throw new Error('Paste your CV first.');
   if (!jobDescription?.trim()) throw new Error('Paste the job description first.');
 
-  let response;
-  try {
-    response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey.trim(),
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 1200,
-        system: SYSTEM_PROMPT,
-        messages: [{ role: 'user', content: buildUserMessage(cv, jobDescription) }],
-      }),
-    });
-  } catch {
-    throw new Error('Could not reach the AI service. Check your connection.');
-  }
+  const result = await postAiAction('recruiterXRay', {
+    cv: cv.trim(),
+    jobDescription: jobDescription.trim(),
+  });
 
-  if (!response.ok) {
-    if (response.status === 401) {
-      throw new Error('That API key was rejected. Check it and try again.');
-    }
-    if (response.status === 429) {
-      throw new Error('Rate limit or quota reached on your API account.');
-    }
-    let detail = '';
-    try {
-      const err = await response.json();
-      detail = err?.error?.message ? ` (${err.error.message})` : '';
-    } catch {
-      /* ignore */
-    }
-    throw new Error(`The AI service returned an error${detail}.`);
-  }
+  return result?.data || result;
+}
 
-  const data = await response.json();
-  const text = (data.content || [])
-    .filter((b) => b.type === 'text')
-    .map((b) => b.text)
-    .join('\n');
+export async function improveBullet({ bullet, context = '' }) {
+  if (!bullet?.trim()) throw new Error('Add a bullet point first.');
+  const result = await postAiAction('improveBullet', { bullet: bullet.trim(), context });
+  return result?.data || result;
+}
 
-  return extractJson(text);
+export async function tailorCvToJob({ cv, jobDescription }) {
+  if (!cv?.trim()) throw new Error('Add CV text first.');
+  if (!jobDescription?.trim()) throw new Error('Paste the job description first.');
+  const result = await postAiAction('tailorCvToJob', { cv: cv.trim(), jobDescription: jobDescription.trim() });
+  return result?.data || result;
 }
