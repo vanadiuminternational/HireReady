@@ -1,5 +1,6 @@
 import { type NextFunction, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
+import { requireDebugStatsAccess } from '../middleware/debugAuth.js';
 import { getAction, listAiActions } from '../orchestrator/actions.js';
 import { getCacheStats, setCachedResult } from '../orchestrator/cache.js';
 import { checkCostGuard } from '../orchestrator/costGuard.js';
@@ -33,7 +34,7 @@ async function getLatestRequest(requestId: string) {
   return recent.find((entry) => entry.requestId === requestId) ?? recent[0] ?? null;
 }
 
-aiRouter.get('/debug/stats', async (_req: Request, res: Response) => {
+aiRouter.get('/debug/stats', requireDebugStatsAccess, async (_req: Request, res: Response) => {
   const configuredProvider = getConfiguredProvider();
   res.json({
     memoryCache: getCacheStats(),
