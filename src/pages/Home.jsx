@@ -8,7 +8,6 @@ import {
   LockKeyhole,
   Mail,
   ShieldCheck,
-  Sparkles,
   Zap,
 } from 'lucide-react';
 import AppShell from '@/components/app/AppShell';
@@ -39,105 +38,92 @@ const trustCards = [
   },
 ];
 
-const toolLinks = [
-  { flag: 'savedCvsEnabled', to: '/saved', icon: Bookmark, label: 'Saved CVs', detail: 'Continue work' },
-  { flag: 'coverLetterEnabled', to: '/cover-letter', icon: Mail, label: 'Cover Letter', detail: 'Tailored letter in minutes' },
+const quickActions = [
+  { title: 'Smart Start', detail: 'Answer 6 prompts and get the right CV path.', to: '/smart-start', icon: Zap, accent: 'from-primary to-emerald-500' },
+  { title: 'Build CV', detail: 'Create a clean ATS-safe CV.', to: '/build', icon: FileText, accent: 'from-charcoal to-slate-600' },
+  { title: 'Cover letter', detail: 'Generate a targeted letter draft.', to: '/cover-letter', icon: Mail, accent: 'from-amber-500 to-orange-500' },
+  { title: 'Saved CVs', detail: 'Open drafts stored on your device.', to: '/saved', icon: Bookmark, accent: 'from-cyan-500 to-blue-500' },
 ];
+
+function ProgressPill({ label, value }) {
+  return (
+    <div className="rounded-2xl bg-white/10 px-3 py-2.5">
+      <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/38">{label}</p>
+      <p className="mt-1 text-sm font-extrabold text-white">{value}</p>
+    </div>
+  );
+}
 
 export default function Home() {
   const [savedCount, setSavedCount] = useState(0);
-  const visibleTools = useMemo(
-    () => toolLinks.filter((item) => FEATURE_FLAGS[item.flag] !== false),
-    [],
-  );
 
   useEffect(() => {
     setSavedCount(getAllCVs().length);
   }, []);
 
+  const primaryCta = useMemo(() => {
+    if (savedCount > 0) return { label: 'Continue latest CV', to: '/saved' };
+    return { label: 'Start Smart Start', to: '/smart-start' };
+  }, [savedCount]);
+
   return (
-    <AppShell contentClassName="space-y-7 pb-7">
-      <section className="space-y-5 pt-2">
-        <div className="space-y-3">
-          <p className="text-[12px] font-extrabold uppercase tracking-[0.18em] text-primary">HireReady</p>
-          <h1 className="max-w-[22rem] text-[2.62rem] font-extrabold leading-[1.04] tracking-[-0.055em] text-charcoal sm:text-[2.85rem]">
-            Build the right CV for your role and market.
-          </h1>
-          <p className="text-[17px] leading-7 text-charcoal/46">
-            Region-aware. ATS-safe. Guided from the start.
-          </p>
-        </div>
-
-        <Link to="/smart-start" className="block rounded-[1.8rem] focus:outline-none focus:ring-4 focus:ring-primary/15">
-          <PremiumCard tone="green" className="relative overflow-hidden p-0">
-            <div className="pointer-events-none absolute -right-12 -top-14 h-44 w-44 rounded-full bg-white/16 blur-2xl" />
-            <div className="pointer-events-none absolute -bottom-16 left-4 h-40 w-40 rounded-full bg-emerald-200/20 blur-3xl" />
-            <div className="relative flex items-center justify-between gap-4 p-6">
-              <div className="min-w-0">
-                <h2 className="text-[1.25rem] font-extrabold leading-tight text-white">Smart CV Start</h2>
-                <p className="mt-2 max-w-[15rem] text-[15px] font-medium leading-6 text-white/68">
-                  Tell us your role and market. We'll build the right structure.
-                </p>
-              </div>
-              <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.55rem] bg-white/14 text-white shadow-inner">
-                <Zap size={30} fill="currentColor" />
-              </span>
+    <AppShell contentClassName="space-y-4 pb-5">
+      <PremiumCard tone="dark" className="overflow-hidden p-0">
+        <Link to={primaryCta.to} className="block bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.25),transparent_13rem)] p-5 active:scale-[0.995]">
+          <div className="mb-5 flex items-start justify-between gap-4">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/42">HireReady</p>
+              <h1 className="mt-2 text-[1.85rem] font-extrabold leading-[1.02] text-white">
+                Build a sharper CV before you apply.
+              </h1>
+              <p className="mt-3 text-sm font-medium leading-6 text-white/58">
+                Smart Start picks the right CV path, then helps you write clean, ATS-safe application content.
+              </p>
             </div>
-          </PremiumCard>
-        </Link>
-
-        <div className="grid grid-cols-2 gap-3">
-          <SecondaryAction to="/saved" icon={Bookmark} className="min-h-[4.7rem] justify-center rounded-[1.45rem] bg-white/95 text-[1rem] shadow-[0_12px_28px_rgba(15,23,42,0.11)]">
-            {savedCount ? `${savedCount} saved CV${savedCount === 1 ? '' : 's'}` : 'Saved CVs'}
-          </SecondaryAction>
-          <SecondaryAction to="/build" icon={FileText} className="min-h-[4.7rem] justify-center rounded-[1.45rem] bg-white/95 text-[1rem] shadow-[0_12px_28px_rgba(15,23,42,0.11)]">
-            Build manually
-          </SecondaryAction>
-        </div>
-      </section>
-
-      <section className="space-y-3">
-        <SectionHeader eyebrow="Why HireReady" />
-        <div className="space-y-3.5">
-          {trustCards.map(({ icon: Icon, emoji, title, detail }) => (
-            <PremiumCard key={title} className="flex items-start gap-4 p-5">
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.15rem] bg-primary/8 text-2xl text-primary">
-                <span aria-hidden="true">{emoji}</span>
-                <Icon className="sr-only" size={20} />
-              </span>
-              <span className="min-w-0">
-                <h3 className="text-[1.05rem] font-extrabold leading-tight tracking-[-0.02em] text-charcoal">{title}</h3>
-                <p className="mt-2 text-[15px] font-medium leading-7 text-charcoal/44">{detail}</p>
-              </span>
-            </PremiumCard>
-          ))}
-        </div>
-      </section>
-
-      <section className="space-y-3 pb-2">
-        <SectionHeader eyebrow="All tools" />
-        <div className="space-y-3.5">
-          <SecondaryAction to="/build" icon={FileText} className="min-h-[5.4rem] justify-start rounded-[1.55rem] bg-white/94 px-5 shadow-[0_12px_28px_rgba(15,23,42,0.1)]">
-            <span className="text-left">
-              <span className="block text-[1.05rem] font-extrabold text-charcoal">Build CV</span>
-              <span className="mt-1 block text-[15px] font-medium text-charcoal/45">Step-by-step builder with ATS scoring</span>
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-white">
+              <ShieldCheck size={23} />
             </span>
-          </SecondaryAction>
-          {visibleTools.slice(1).map(({ to, icon: Icon, label, detail }) => (
-            <SecondaryAction key={to} to={to} icon={Icon} className="min-h-[5.4rem] justify-start rounded-[1.55rem] bg-white/94 px-5 shadow-[0_12px_28px_rgba(15,23,42,0.1)]">
-              <span className="text-left">
-                <span className="block text-[1.05rem] font-extrabold text-charcoal">{label}</span>
-                <span className="mt-1 block text-[15px] font-medium text-charcoal/45">{detail}</span>
-              </span>
-            </SecondaryAction>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2">
+            <ProgressPill label="Saved" value={savedCount} />
+            <ProgressPill label="Mode" value={FEATURE_FLAGS.aiAssistance ? 'AI' : 'Local'} />
+            <ProgressPill label="Privacy" value="Local" />
+          </div>
+        </Link>
+      </PremiumCard>
+
+      <div className="grid grid-cols-2 gap-3">
+        {quickActions.map(({ title, detail, to, icon: Icon, accent }) => (
+          <Link key={title} to={to} className="group block rounded-[1.5rem] border border-black/[0.055] bg-white/82 p-3.5 shadow-[0_16px_36px_rgba(15,23,42,0.07)] active:scale-[0.985]">
+            <span className={`mb-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br ${accent} text-white shadow-lg shadow-black/10`}>
+              <Icon size={18} />
+            </span>
+            <p className="text-sm font-extrabold text-charcoal">{title}</p>
+            <p className="mt-1 text-xs font-medium leading-5 text-charcoal/54">{detail}</p>
+          </Link>
+        ))}
+      </div>
+
+      <PremiumCard className="space-y-3 p-4">
+        <SectionHeader eyebrow="Trusted workflow" title="Application tools that stay practical" className="mb-0" />
+        <div className="space-y-2.5">
+          {trustCards.map(({ icon: Icon, emoji, title, detail }) => (
+            <div key={title} className="flex gap-3 rounded-[1.25rem] bg-black/[0.025] p-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white shadow-sm">
+                <span className="text-lg" aria-hidden="true">{emoji}</span>
+                <Icon size={0} className="sr-only" />
+              </div>
+              <div>
+                <p className="text-sm font-extrabold text-charcoal">{title}</p>
+                <p className="mt-0.5 text-xs font-medium leading-5 text-charcoal/55">{detail}</p>
+              </div>
+            </div>
           ))}
         </div>
-      </section>
+      </PremiumCard>
 
-      <div className="flex items-center gap-2 pb-1 text-[10.5px] font-extrabold uppercase tracking-[0.18em] text-charcoal/30">
-        <ShieldCheck size={13} />
-        <span>Private by default</span>
-      </div>
+      <SecondaryAction to="/privacy" className="justify-center">Privacy and local-first design</SecondaryAction>
     </AppShell>
   );
 }
