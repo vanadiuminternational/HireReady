@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
-  ArrowRight,
   Bookmark,
   CheckSquare,
   FileText,
@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 import AppShell from '@/components/app/AppShell';
 import PremiumCard from '@/components/app/PremiumCard';
-import PrimaryAction from '@/components/app/PrimaryAction';
 import SecondaryAction from '@/components/app/SecondaryAction';
 import SectionHeader from '@/components/app/SectionHeader';
 import { FEATURE_FLAGS } from '@/config/featureFlags';
@@ -69,24 +68,23 @@ export default function Home() {
           </p>
         </div>
 
-        <PremiumCard tone="green" className="relative overflow-hidden p-0">
-          <div className="pointer-events-none absolute -right-12 -top-14 h-44 w-44 rounded-full bg-white/16 blur-2xl" />
-          <div className="pointer-events-none absolute -bottom-16 left-4 h-40 w-40 rounded-full bg-emerald-200/20 blur-3xl" />
-          <div className="relative flex items-center justify-between gap-4 p-6">
-            <div className="min-w-0">
-              <h2 className="text-[1.25rem] font-extrabold leading-tight text-white">Smart CV Start</h2>
-              <p className="mt-2 max-w-[15rem] text-[15px] font-medium leading-6 text-white/68">
-                Tell us your role and market. We'll build the right structure.
-              </p>
+        <Link to="/smart-start" className="block rounded-[1.8rem] focus:outline-none focus:ring-4 focus:ring-primary/15">
+          <PremiumCard tone="green" className="relative overflow-hidden p-0">
+            <div className="pointer-events-none absolute -right-12 -top-14 h-44 w-44 rounded-full bg-white/16 blur-2xl" />
+            <div className="pointer-events-none absolute -bottom-16 left-4 h-40 w-40 rounded-full bg-emerald-200/20 blur-3xl" />
+            <div className="relative flex items-center justify-between gap-4 p-6">
+              <div className="min-w-0">
+                <h2 className="text-[1.25rem] font-extrabold leading-tight text-white">Smart CV Start</h2>
+                <p className="mt-2 max-w-[15rem] text-[15px] font-medium leading-6 text-white/68">
+                  Tell us your role and market. We'll build the right structure.
+                </p>
+              </div>
+              <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.55rem] bg-white/14 text-white shadow-inner">
+                <Zap size={30} fill="currentColor" />
+              </span>
             </div>
-            <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.55rem] bg-white/14 text-white shadow-inner">
-              <Zap size={30} fill="currentColor" />
-            </span>
-          </div>
-          <PrimaryAction to="/smart-start" icon={ArrowRight} className="sr-only">
-            Start Smart CV
-          </PrimaryAction>
-        </PremiumCard>
+          </PremiumCard>
+        </Link>
 
         <div className="grid grid-cols-2 gap-3">
           <SecondaryAction to="/saved" icon={Bookmark} className="min-h-[4.7rem] justify-center rounded-[1.45rem] bg-white/95 text-[1rem] shadow-[0_12px_28px_rgba(15,23,42,0.11)]">
