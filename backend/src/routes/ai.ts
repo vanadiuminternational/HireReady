@@ -9,13 +9,23 @@ import { createRequestLog, getRequestLogStats, updateRequestLog } from '../orche
 import { planRoute } from '../orchestrator/router.js';
 import { validateRecruiterXrayResult } from '../orchestrator/validator.js';
 import { mockProvider } from '../providers/mockProvider.js';
+import { getConfiguredProvider, listProviders } from '../providers/providerRegistry.js';
 import { recruiterXrayRequestSchema } from '../schemas/recruiterXray.js';
 import { aiStorage } from '../storage/storageFactory.js';
 
 export const aiRouter = Router();
 
 aiRouter.get('/actions', (_req: Request, res: Response) => {
-  res.json({ actions: listAiActions() });
+  const configuredProvider = getConfiguredProvider();
+  res.json({
+    actions: listAiActions(),
+    providers: listProviders(),
+    configuredProvider: {
+      id: configuredProvider.id,
+      displayName: configuredProvider.displayName,
+      live: configuredProvider.live,
+    },
+  });
 });
 
 async function getLatestRequest(requestId: string) {
@@ -24,11 +34,18 @@ async function getLatestRequest(requestId: string) {
 }
 
 aiRouter.get('/debug/stats', async (_req: Request, res: Response) => {
+  const configuredProvider = getConfiguredProvider();
   res.json({
     memoryCache: getCacheStats(),
     memoryRequests: getRequestLogStats(),
     recentRequests: await aiStorage.getRecentRequests(10),
     storage: await aiStorage.getStats(),
+    providers: listProviders(),
+    configuredProvider: {
+      id: configuredProvider.id,
+      displayName: configuredProvider.displayName,
+      live: configuredProvider.live,
+    },
     scaffold: {
       liveAi: false,
       note: 'Storage-backed scaffold stats. Use authenticated observability before production live AI.',
@@ -76,6 +93,28 @@ aiRouter.post('/recruiter-xray', async (req: Request, res: Response) => {
     routeProvider: routePlan.provider,
     modelTier: routePlan.modelTier,
   });
+
+  if (routePlan.provider === 'disabled-live') {
+    updateRequestLog(requestLog.requestId, {
+      status: 'failed',
+      errorType: 'live_provider_disabled',
+      latencyMs: Date.now() - started,
+    });
+    await aiStorage.updateRequest(requestLog.requestId, {
+      status: 'failed',
+      errorType: 'live_provider_disabled',
+      latencyMs: Date.now() - started,
+    });
+    res.status(503).json({
+      error: 'Live AI provider is not enabled yet.',
+      route: routePlan,
+      scaffold: {
+        liveAi: false,
+        note: 'Provider adapter scaffold is present, but real provider execution is intentionally disabled.',
+      },
+    });
+    return;
+  }
 
   const cached = action.cacheable ? await aiStorage.getCacheEntry(inputHash) : null;
   if (cached) {
@@ -163,6 +202,8 @@ aiRouter.post('/recruiter-xray', async (req: Request, res: Response) => {
       jobDescription,
       modelTier: routePlan.modelTier,
       maxOutputTokens: action.maxOutputTokens,
+      requestId: requestLog.requestId,
+      inputHash,
     });
 
     const validation = validateRecruiterXrayResult(providerResponse.result);

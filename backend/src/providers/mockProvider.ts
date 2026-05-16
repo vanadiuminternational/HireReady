@@ -6,6 +6,8 @@ function estimateTokens(text: string) {
 
 export const mockProvider: AiProvider = {
   id: 'mock',
+  displayName: 'Mock Provider',
+  live: false,
 
   async runRecruiterXray(request: ProviderRequest): Promise<ProviderResponse> {
     const started = Date.now();
