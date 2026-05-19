@@ -8,7 +8,6 @@ import Home from './pages/Home';
 import SmartStart from './pages/SmartStart';
 import Recommendation from './pages/Recommendation';
 import BuildCV from './pages/BuildCV';
-import Templates from './pages/Templates';
 import SavedCVs from './pages/SavedCVs';
 import CoverLetter from './pages/CoverLetter';
 import InterviewPrep from './pages/InterviewPrep';
@@ -24,7 +23,7 @@ function App() {
           <Route path="/smart-start" element={<SmartStart />} />
           <Route path="/recommendation" element={<Recommendation />} />
           <Route path="/build" element={<BuildCV />} />
-          <Route path="/templates" element={<Templates />} />
+          <Route path="/templates" element={<BuildCV />} />
           <Route path="/saved" element={<SavedCVs />} />
           <Route path="/cover-letter" element={<CoverLetter />} />
           <Route path="/interview" element={<InterviewPrep />} />
