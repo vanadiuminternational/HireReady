@@ -6,8 +6,8 @@ export function emptyApplicationContext() {
     updatedAt: null,
     smartStart: {
       targetRole: '',
-      targetRegion: 'uk',
-      cvFormat: 'ukGrad',
+      targetRegion: 'uk-ie',
+      cvFormat: 'ukIrelandGrad',
       careerStage: '',
       primaryWorry: '',
       jobDescription: '',
@@ -61,6 +61,11 @@ export function migrateApplicationContext(rawContext) {
 
   return {
     ...context,
+    smartStart: {
+      ...context.smartStart,
+      targetRegion: context.smartStart.targetRegion === 'uk' ? 'uk-ie' : context.smartStart.targetRegion,
+      cvFormat: context.smartStart.cvFormat === 'ukGrad' ? 'ukIrelandGrad' : context.smartStart.cvFormat,
+    },
     version: APPLICATION_CONTEXT_VERSION,
   };
 }
