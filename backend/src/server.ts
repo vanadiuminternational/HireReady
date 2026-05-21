@@ -13,7 +13,7 @@ app.use(express.json({ limit: '1mb' }));
 app.get('/api/health', (_req, res) => {
   res.json({
     ok: true,
-    service: 'hireready-ai-backend',
+    service: 'gradsharp-ai-backend',
     mode: 'mock-ai-scaffold',
     liveAiEnabled: false,
   });
@@ -26,6 +26,6 @@ app.use((_req, res) => {
 });
 
 app.listen(config.port, () => {
-  console.log(`HireReady AI backend scaffold listening on port ${config.port}`);
+  console.log(`GradSharp AI backend scaffold listening on port ${config.port}`);
   console.log('Live AI is disabled in this scaffold. Mock provider only.');
 });

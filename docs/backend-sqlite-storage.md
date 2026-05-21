@@ -1,6 +1,6 @@
 # Backend SQLite Storage
 
-This document explains the SQLite storage option for the HireReady AI backend.
+This document explains the SQLite storage option for the GradSharp AI backend.
 
 ## Purpose
 
@@ -22,7 +22,7 @@ In `backend/.env`:
 
 ```text
 STORAGE_DRIVER=sqlite
-SQLITE_PATH=./data/hireready.sqlite
+SQLITE_PATH=./data/gradsharp.sqlite
 ```
 
 Then run:

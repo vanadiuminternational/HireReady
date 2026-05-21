@@ -1,19 +1,19 @@
 /**
  * appConfig.js
- * Central configuration for HireReady CV Engine.
+ * Central configuration for GradSharp CV Engine.
  * Edit this file to adjust app-wide settings.
  */
 
 export const APP_CONFIG = {
-  name: 'HireReady CV Engine',
+  name: 'GradSharp CV Engine',
   version: '1.0.0',
 
   // Storage
   storageKeys: {
-    cvs: 'hirereready_cvs',
-    coverLetters: 'hirereready_cover_letters',
-    appPacks: 'hirereready_app_packs',
-    settings: 'hirereready_settings',
+    cvs: 'gradsharp_cvs',
+    coverLetters: 'gradsharp_cover_letters',
+    appPacks: 'gradsharp_app_packs',
+    settings: 'gradsharp_settings',
   },
 
   // Limits for free tier

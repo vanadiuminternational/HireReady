@@ -4,7 +4,7 @@ export const AI_TIERS = {
     label: 'Free logic',
     credits: 0,
     modelTier: 'none',
-    description: 'Uses HireReady rules and local checks. No AI call and no credits.',
+    description: 'Uses GradSharp rules and local checks. No AI call and no credits.',
   },
   assist: {
     id: 'assist',

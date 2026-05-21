@@ -17,7 +17,7 @@ Use this in `backend/.env`:
 
 ```text
 STORAGE_DRIVER=sqlite
-SQLITE_PATH=./data/hireready.sqlite
+SQLITE_PATH=./data/gradsharp.sqlite
 AI_LIVE_ENABLED=false
 AI_PROVIDER=mock
 ```

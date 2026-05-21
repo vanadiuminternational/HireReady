@@ -1,7 +1,7 @@
 export const PLATFORM_CONFIG = {
   android: {
     enabled: true,
-    packageId: 'com.vanadiumdigital.hireready',
+    packageId: 'com.vanadiumdigital.gradsharp',
     minSdkVersion: 24,
     compileSdkVersion: 36,
     targetSdkVersion: 36,

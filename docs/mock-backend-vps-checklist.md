@@ -40,7 +40,7 @@ npm run build
 Set for deployed backend:
 
 ```text
-VITE_HIREREADY_API_URL=https://api.yourdomain.com
+VITE_GRADSHARP_API_URL=https://api.yourdomain.com
 ```
 
 Then:

@@ -31,7 +31,7 @@ import { getStoredSmartStart } from '@/lib/smartStartStorage';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 
-const COVER_LETTER_STORAGE_KEY = 'hireready_cover_letters';
+const COVER_LETTER_STORAGE_KEY = 'gradsharp_cover_letters';
 const LEGACY_COVER_LETTER_STORAGE_KEY = 'hirereready_cover_letters';
 
 const STEPS = [

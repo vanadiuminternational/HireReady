@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.vanadiumdigital.hireready',
-  appName: 'HireReady',
+  appId: 'com.vanadiumdigital.gradsharp',
+  appName: 'GradSharp',
   webDir: 'dist',
   android: {
     allowMixedContent: true,

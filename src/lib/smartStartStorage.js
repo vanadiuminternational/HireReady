@@ -1,4 +1,4 @@
-export const SMART_START_KEY = 'hireready_smart_start';
+export const SMART_START_KEY = 'gradsharp_smart_start';
 
 export const DEFAULT_SMART_START = {
   targetRole: '',

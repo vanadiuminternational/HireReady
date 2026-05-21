@@ -11,7 +11,7 @@ Build Android Debug APK
 Artifact name:
 
 ```text
-HireReady-debug-apk
+GradSharp-debug-apk
 ```
 
 ## When it runs
@@ -30,7 +30,7 @@ The workflow runs when:
 5. Download:
 
 ```text
-HireReady-debug-apk
+GradSharp-debug-apk
 ```
 
 6. Extract the ZIP.
@@ -65,7 +65,7 @@ Restrict Android cleartext traffic before Play Store release
 The APK uses whatever backend URL was present at build time through:
 
 ```text
-VITE_HIREREADY_API_URL
+VITE_GRADSHARP_API_URL
 ```
 
 If this is blank, Recruiter X-Ray will show the backend-not-connected fallback.

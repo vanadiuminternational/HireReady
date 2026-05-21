@@ -180,7 +180,7 @@ export default function RecruiterXRay() {
           Reviewed line by line against the job.
         </h1>
         <p className="text-[15px] font-medium leading-7 text-charcoal/52">
-          Paste your CV and the job you are targeting. HireReady will show the line most likely to be questioned before you send it.
+          Paste your CV and the job you are targeting. GradSharp will show the line most likely to be questioned before you send it.
         </p>
       </section>
 

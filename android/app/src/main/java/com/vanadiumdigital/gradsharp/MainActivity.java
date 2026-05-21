@@ -1,4 +1,4 @@
-package com.vanadiumdigital.hireready;
+package com.vanadiumdigital.gradsharp;
 
 import com.getcapacitor.BridgeActivity;
 

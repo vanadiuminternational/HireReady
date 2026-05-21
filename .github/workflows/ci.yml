@@ -1,4 +1,4 @@
-name: HireReady CI
+name: GradSharp CI
 
 on:
   pull_request:

@@ -28,7 +28,7 @@ curl http://localhost:8787/api/ai/actions
 Create `.env.local` in the repo root:
 
 ```bash
-VITE_HIREREADY_API_URL=http://localhost:8787
+VITE_GRADSHARP_API_URL=http://localhost:8787
 ```
 
 Then run:
@@ -64,7 +64,7 @@ Expected:
 
 ## 4. Test fallback
 
-Remove or clear `VITE_HIREREADY_API_URL` and restart frontend.
+Remove or clear `VITE_GRADSHARP_API_URL` and restart frontend.
 
 Expected:
 
@@ -79,7 +79,7 @@ When testing from Android emulator, `localhost` inside the Android WebView may n
 Use the emulator host alias:
 
 ```text
-VITE_HIREREADY_API_URL=http://10.0.2.2:8787
+VITE_GRADSHARP_API_URL=http://10.0.2.2:8787
 ```
 
 For physical Android device testing, use the host computer LAN IP or deployed HTTPS backend URL.

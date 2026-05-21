@@ -1,6 +1,6 @@
 # Backend Persistent Storage Scaffold
 
-This document describes the first storage abstraction for the HireReady AI backend.
+This document describes the first storage abstraction for the GradSharp AI backend.
 
 ## Current purpose
 
