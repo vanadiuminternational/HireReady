@@ -1,9 +1,9 @@
 services:
-  hireready-backend:
+  gradsharp-backend:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: hireready-backend
+    container_name: gradsharp-backend
     restart: unless-stopped
     env_file:
       - .env

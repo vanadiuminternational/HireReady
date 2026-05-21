@@ -10,6 +10,6 @@ export const config = {
   aiProvider: process.env.AI_PROVIDER ?? 'mock',
   platformMonthlyCostCapCents: Number(process.env.PLATFORM_MONTHLY_COST_CAP_CENTS ?? 2500),
   storageDriver: process.env.STORAGE_DRIVER ?? 'memory',
-  sqlitePath: process.env.SQLITE_PATH ?? './data/hireready.sqlite',
+  sqlitePath: process.env.SQLITE_PATH ?? './data/gradsharp.sqlite',
   debugStatsToken: process.env.DEBUG_STATS_TOKEN ?? '',
 };

@@ -19,7 +19,7 @@ export default function Privacy() {
           <Shield size={22} />
         </div>
         <p className="text-[15px] font-medium leading-7 text-charcoal/64">
-          HireReady runs on your phone. Your CV stays in your browser unless you ask for a recruiter review, which sends it once to our server for analysis and isn't stored. We don't ask for your API keys. We don't have your email. If you delete the app, your data goes with it.
+          GradSharp runs on your phone. Your CV stays in your browser unless you ask for a recruiter review, which sends it once to our server for analysis and isn't stored. We don't ask for your API keys. We don't have your email. If you delete the app, your data goes with it.
         </p>
       </PremiumCard>
 

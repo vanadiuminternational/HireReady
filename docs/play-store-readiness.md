@@ -1,12 +1,12 @@
-# HireReady Play Store Readiness Guide
+# GradSharp Play Store Readiness Guide
 
 _Last updated: May 2026_
 
-This document prepares HireReady for a first Google Play release as a local-first Android app.
+This document prepares GradSharp for a first Google Play release as a local-first Android app.
 
 ## Current release position
 
-HireReady is currently positioned as a local-first Android CV and application-preparation app.
+GradSharp is currently positioned as a local-first Android CV and application-preparation app.
 
 Core tools in this release:
 
@@ -36,25 +36,25 @@ Not live in this release:
 Current Android package:
 
 ```text
-com.vanadiumdigital.hireready
+com.vanadiumdigital.gradsharp
 ```
 
 Current app name:
 
 ```text
-HireReady
+GradSharp
 ```
 
 Recommended store title:
 
 ```text
-HireReady: CV Builder & Job Prep
+GradSharp: CV Builder & Job Prep
 ```
 
 Short store name shown on device should remain:
 
 ```text
-HireReady
+GradSharp
 ```
 
 ## Google Play short description
@@ -66,11 +66,11 @@ Build ATS-safe CVs, cover letters, and interview prep from your phone.
 ## Google Play full description draft
 
 ```text
-HireReady helps job seekers build stronger, cleaner, and more targeted application documents directly on their Android phone.
+GradSharp helps job seekers build stronger, cleaner, and more targeted application documents directly on their Android phone.
 
-Start with Smart Start: answer a few quick questions about your target role, market, career stage, and CV type. HireReady then recommends a suitable CV structure before you begin writing.
+Start with Smart Start: answer a few quick questions about your target role, market, career stage, and CV type. GradSharp then recommends a suitable CV structure before you begin writing.
 
-Use HireReady to:
+Use GradSharp to:
 
 • Build ATS-safe CVs
 • Get region-aware CV guidance
@@ -95,7 +95,7 @@ Use this only after confirming the final APK/AAB does not include analytics, ads
 Current position:
 
 ```text
-The app does not collect or transmit user CV content, cover letters, personal profile data, or job descriptions to a HireReady server in this release.
+The app does not collect or transmit user CV content, cover letters, personal profile data, or job descriptions to a GradSharp server in this release.
 ```
 
 ### Data sharing
@@ -211,7 +211,7 @@ Then build an AAB through Android Studio or Gradle.
 ## AAB release notes draft
 
 ```text
-First HireReady Android release.
+First GradSharp Android release.
 
 Includes Smart Start CV guidance, ATS-safe CV builder, cover-letter drafts, CV scoring, keyword review, saved CVs, templates, interview prep, and local-first privacy design.
 ```

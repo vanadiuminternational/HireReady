@@ -4,7 +4,7 @@ This is PR 1 under Issue #30.
 
 ## Purpose
 
-ApplicationContext is the local-first spine of HireReady.
+ApplicationContext is the local-first spine of GradSharp.
 
 The target architecture is:
 

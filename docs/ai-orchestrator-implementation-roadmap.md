@@ -1,4 +1,4 @@
-# HireReady AI Orchestrator Implementation Roadmap
+# GradSharp AI Orchestrator Implementation Roadmap
 
 This roadmap turns the AI Orchestrator architecture into controlled implementation PRs.
 

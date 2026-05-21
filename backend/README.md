@@ -1,6 +1,6 @@
-# HireReady AI Backend Scaffold
+# GradSharp AI Backend Scaffold
 
-This backend is the first implementation step for the HireReady AI Orchestrator.
+This backend is the first implementation step for the GradSharp AI Orchestrator.
 
 Current status:
 

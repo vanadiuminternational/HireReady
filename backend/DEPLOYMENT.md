@@ -1,4 +1,4 @@
-# HireReady Mock Backend VPS Deployment Guide
+# GradSharp Mock Backend VPS Deployment Guide
 
 This guide deploys the current mock AI backend only.
 
@@ -9,7 +9,7 @@ It does **not** enable live AI provider calls.
 Deploy:
 
 ```text
-HireReady Android app
+GradSharp Android app
 → HTTPS backend URL
 → mock AI Orchestrator backend
 → no live AI provider
@@ -55,8 +55,8 @@ Use your VPS provider's recommended Docker install path. On Ubuntu, Docker's off
 ### 3. Clone repo
 
 ```bash
-git clone https://github.com/vanadiuminternational/HireReady.git
-cd HireReady/backend
+git clone https://github.com/vanadiuminternational/HireReady.git GradSharp
+cd GradSharp/backend
 ```
 
 ### 4. Create backend env file
@@ -106,13 +106,13 @@ liveAiEnabled: false
 Use this if you do not want Docker.
 
 ```bash
-git clone https://github.com/vanadiuminternational/HireReady.git
-cd HireReady/backend
+git clone https://github.com/vanadiuminternational/HireReady.git GradSharp
+cd GradSharp/backend
 cp .env.example .env
 npm install
 npm run build
 npm install -g pm2
-pm2 start dist/server.js --name hireready-backend
+pm2 start dist/server.js --name gradsharp-backend
 pm2 save
 pm2 startup
 ```
@@ -157,13 +157,13 @@ https://api.yourdomain.com
 For local emulator testing:
 
 ```text
-VITE_HIREREADY_API_URL=http://10.0.2.2:8787
+VITE_GRADSHARP_API_URL=http://10.0.2.2:8787
 ```
 
 For deployed VPS testing:
 
 ```text
-VITE_HIREREADY_API_URL=https://api.yourdomain.com
+VITE_GRADSHARP_API_URL=https://api.yourdomain.com
 ```
 
 After changing `.env.local`, rebuild and sync Android:

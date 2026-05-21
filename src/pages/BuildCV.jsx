@@ -174,7 +174,7 @@ function SmartPlanCard({ smartStart, recommendation }) {
         <SectionHeader
           eyebrow="Smarter start"
           title="Start with a CV plan first"
-          description="Answer four quick questions so HireReady can recommend the right structure before you build."
+          description="Answer four quick questions so GradSharp can recommend the right structure before you build."
           action={<Sparkles size={18} className="text-primary" />}
           className="mb-0"
         />

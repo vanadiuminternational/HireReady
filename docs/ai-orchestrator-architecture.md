@@ -1,14 +1,14 @@
-# HireReady AI Orchestrator Architecture
+# GradSharp AI Orchestrator Architecture
 
 _Last updated: May 2026_
 
-This document defines the planned AI backbone for HireReady.
+This document defines the planned AI backbone for GradSharp.
 
 The goal is not to call an AI provider directly from the Android app. The goal is to build a server-side AI orchestration layer that gives users premium results while protecting platform cost, privacy, reliability, and provider credentials.
 
 ## Product principle
 
-HireReady should feel simple to the user:
+GradSharp should feel simple to the user:
 
 ```text
 Tap an action → see credit cost → get a useful result
@@ -43,7 +43,7 @@ All live AI must go through the backend.
 ```text
 Android App
   ↓
-HireReady Backend API
+GradSharp Backend API
   ↓
 AI Orchestrator
   ↓
@@ -441,7 +441,7 @@ Before live AI is enabled:
 - privacy policy must be updated
 - Google Play Data Safety form must be updated
 - user consent wording should be added near AI actions
-- app must explain that CV/job text is sent to HireReady backend for processing
+- app must explain that CV/job text is sent to GradSharp backend for processing
 - provider data-retention policy must be reviewed
 
 Do not enable live AI silently.

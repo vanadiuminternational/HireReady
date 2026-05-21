@@ -1,4 +1,4 @@
-# HireReady VPS HTTPS Deployment Runbook
+# GradSharp VPS HTTPS Deployment Runbook
 
 This runbook deploys the mock AI backend to a VPS over HTTPS.
 
@@ -47,8 +47,8 @@ ping api.example.com
 ```bash
 ssh root@YOUR_VPS_IP
 cd /opt
-git clone https://github.com/vanadiuminternational/HireReady.git
-cd HireReady/backend
+git clone https://github.com/vanadiuminternational/HireReady.git GradSharp
+cd GradSharp/backend
 ```
 
 ## 3. Configure backend env
@@ -67,7 +67,7 @@ CORS_ORIGIN=*
 AI_LIVE_ENABLED=false
 AI_PROVIDER=mock
 STORAGE_DRIVER=sqlite
-SQLITE_PATH=./data/hireready.sqlite
+SQLITE_PATH=./data/gradsharp.sqlite
 DEBUG_STATS_TOKEN=use-a-long-random-secret
 ```
 
@@ -101,8 +101,8 @@ apt install nginx -y
 Copy the example config:
 
 ```bash
-cp /opt/HireReady/deploy/nginx/hireready-api.example.conf /etc/nginx/sites-available/hireready-api.conf
-nano /etc/nginx/sites-available/hireready-api.conf
+cp /opt/GradSharp/deploy/nginx/gradsharp-api.example.conf /etc/nginx/sites-available/gradsharp-api.conf
+nano /etc/nginx/sites-available/gradsharp-api.conf
 ```
 
 Replace:
@@ -116,7 +116,7 @@ with the real backend domain.
 Enable site:
 
 ```bash
-ln -s /etc/nginx/sites-available/hireready-api.conf /etc/nginx/sites-enabled/hireready-api.conf
+ln -s /etc/nginx/sites-available/gradsharp-api.conf /etc/nginx/sites-enabled/gradsharp-api.conf
 nginx -t
 systemctl reload nginx
 ```
@@ -196,7 +196,7 @@ cache.hit = true
 In frontend `.env.local`:
 
 ```text
-VITE_HIREREADY_API_URL=https://api.example.com
+VITE_GRADSHARP_API_URL=https://api.example.com
 ```
 
 Then:

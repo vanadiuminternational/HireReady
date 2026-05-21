@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace = "com.vanadiumdigital.hireready"
+    namespace = "com.vanadiumdigital.gradsharp"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.vanadiumdigital.hireready"
+        applicationId "com.vanadiumdigital.gradsharp"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

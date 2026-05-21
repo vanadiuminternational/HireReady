@@ -1,4 +1,4 @@
-# HireReady Android Release Checklist
+# GradSharp Android Release Checklist
 
 Use this before building the first Play Store AAB.
 
@@ -38,8 +38,8 @@ anthropic-dangerous-direct-browser-access
 Confirm:
 
 ```text
-Package ID: com.vanadiumdigital.hireready
-App name: HireReady
+Package ID: com.vanadiumdigital.gradsharp
+App name: GradSharp
 Version code: 1
 Version name: 1.0
 ```
@@ -99,7 +99,7 @@ Confirm before submission:
 ## 8. First release notes
 
 ```text
-First HireReady Android release. Includes Smart Start CV guidance, ATS-safe CV builder, cover-letter drafts, CV scoring, keyword review, saved CVs, templates, interview prep, and local-first privacy design.
+First GradSharp Android release. Includes Smart Start CV guidance, ATS-safe CV builder, cover-letter drafts, CV scoring, keyword review, saved CVs, templates, interview prep, and local-first privacy design.
 ```
 
 ## 9. Final decision gate

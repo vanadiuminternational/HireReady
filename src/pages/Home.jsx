@@ -22,7 +22,7 @@ const trustCards = [
     icon: Globe2,
     emoji: '🌍',
     title: 'Region-aware rules',
-    detail: 'UK, US, Germany, UAE — every market has different CV rules. HireReady knows them.',
+    detail: 'UK, US, Germany, UAE — every market has different CV rules. GradSharp knows them.',
   },
   {
     icon: CheckSquare,
@@ -72,7 +72,7 @@ export default function Home() {
         <Link to={primaryCta.to} className="block bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.25),transparent_13rem)] p-5 active:scale-[0.995]">
           <div className="mb-5 flex items-start justify-between gap-4">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/42">HireReady</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/42">GradSharp</p>
               <h1 className="mt-2 text-[1.85rem] font-extrabold leading-[1.02] text-white">
                 Build a sharper CV before you apply.
               </h1>

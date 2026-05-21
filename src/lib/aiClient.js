@@ -1,5 +1,5 @@
 // aiClient.js
-// Frontend-safe AI client facade for HireReady.
+// Frontend-safe AI client facade for GradSharp.
 //
 // No provider API key is stored in the browser.
 // No direct Anthropic/OpenAI/Gemini call is made from frontend code.
@@ -16,7 +16,7 @@ export class BackendNotConfiguredError extends Error {
   }
 }
 
-const API_BASE_URL = import.meta.env.VITE_HIREREADY_API_URL || '';
+const API_BASE_URL = import.meta.env.VITE_GRADSHARP_API_URL || '';
 
 function getApiBaseUrl() {
   return API_BASE_URL.replace(/\/$/, '');
@@ -38,7 +38,7 @@ async function postJson(path, payload) {
   const baseUrl = getApiBaseUrl();
 
   if (!baseUrl) {
-    throw new BackendNotConfiguredError('HireReady AI backend is not connected yet.');
+    throw new BackendNotConfiguredError('GradSharp AI backend is not connected yet.');
   }
 
   const response = await fetch(`${baseUrl}${path}`, {
@@ -85,7 +85,7 @@ async function postAiAction(actionId, payload) {
 
   if (!API_BASE_URL) {
     throw new BackendNotConfiguredError(
-      `${plan.action.label} is planned as a ${plan.credits}-credit AI action, but the HireReady VPS backend is not connected yet.`
+      `${plan.action.label} is planned as a ${plan.credits}-credit AI action, but the GradSharp VPS backend is not connected yet.`
     );
   }
 

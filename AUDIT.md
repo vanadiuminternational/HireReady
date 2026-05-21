@@ -1,10 +1,10 @@
-# HireReady Audit Notes
+# GradSharp Audit Notes
 
 This file records the current repository hygiene findings and also creates a fresh commit so GitHub code search can re-index the repository.
 
 ## Current status
 
-- App: HireReady CV Engine
+- App: GradSharp CV Engine
 - Stack: Vite + React
 - Default branch: main
 - Product model: local-first CV builder with ATS scoring, templates, cover letters, interview prep, and Recruiter X-Ray

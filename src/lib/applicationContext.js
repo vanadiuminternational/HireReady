@@ -1,7 +1,7 @@
 import { emptyApplicationContext, migrateApplicationContext, APPLICATION_CONTEXT_VERSION } from './applicationContext.migrations';
 import { readStorage, writeStorage } from './storage';
 
-export const APPLICATION_CONTEXT_STORAGE_KEY = 'hireready.applicationContext';
+export const APPLICATION_CONTEXT_STORAGE_KEY = 'gradsharp.applicationContext';
 
 export { APPLICATION_CONTEXT_VERSION, emptyApplicationContext };
 

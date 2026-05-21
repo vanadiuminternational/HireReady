@@ -1,8 +1,8 @@
-# HireReady
+# GradSharp
 
-HireReady is an independent smart CV and cover-letter web app.
+GradSharp is an independent smart CV and cover-letter web app.
 
-The goal is not to be another generic template builder. HireReady is being shaped into a **CV Intelligence Engine**: it recommends the right CV structure for the user's region, job category, and career stage, then uses AI only where AI adds real value.
+The goal is not to be another generic template builder. GradSharp is being shaped into a **CV Intelligence Engine**: it recommends the right CV structure for the user's region, job category, and career stage, then uses AI only where AI adds real value.
 
 ## Current stack
 
@@ -13,7 +13,7 @@ The goal is not to be another generic template builder. HireReady is being shape
 
 ## Product direction
 
-HireReady should answer:
+GradSharp should answer:
 
 ```text
 What kind of CV does this person actually need?
@@ -36,7 +36,7 @@ No Stripe payment flow is active in this phase. Pay-as-you-go credits and subscr
 
 The frontend must not store or expose provider API keys.
 
-AI features are being prepared through a backend-safe facade and provider-agnostic router. Future AI calls should go through a HireReady VPS backend that handles:
+AI features are being prepared through a backend-safe facade and provider-agnostic router. Future AI calls should go through a GradSharp VPS backend that handles:
 
 - provider keys,
 - model routing,
@@ -78,7 +78,7 @@ src/pages/        app screens
 src/components/   shared UI components
 src/services/     current rule-based CV, cover-letter, storage, export engines
 src/data/         existing templates, job samples, word lists
-src/engine/       HireReady v2 knowledge engine and future AI/credit planning
+src/engine/       GradSharp v2 knowledge engine and future AI/credit planning
 src/lib/          frontend utilities and backend-safe AI facade
 ```
 
@@ -87,7 +87,7 @@ src/lib/          frontend utilities and backend-safe AI facade
 The v2 roadmap is tracked in GitHub Issue #1:
 
 ```text
-HireReady v2 Roadmap — Independent Smart CV Intelligence Engine
+GradSharp v2 Roadmap — Independent Smart CV Intelligence Engine
 ```
 
 ## Immediate implementation direction

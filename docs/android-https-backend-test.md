@@ -7,7 +7,7 @@ Use this after the mock backend is deployed to a VPS with HTTPS.
 Create or update `.env.local` in the repo root:
 
 ```text
-VITE_HIREREADY_API_URL=https://api.example.com
+VITE_GRADSHARP_API_URL=https://api.example.com
 ```
 
 Replace `api.example.com` with the real backend domain.
@@ -47,7 +47,7 @@ no Failed to fetch error
 Clear the frontend env value:
 
 ```text
-VITE_HIREREADY_API_URL=
+VITE_GRADSHARP_API_URL=
 ```
 
 Rebuild and sync Android.
